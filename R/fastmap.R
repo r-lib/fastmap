@@ -4,17 +4,26 @@ NULL
 #' @export
 fastmap <- function() {
   # Number of items currently stored in the fastmap object.
-  n <- 0L
+  n <- NULL
   # Mapping from key (a string) to index into the list that stores the values
   # (which can be any R object).
-  key_idx_map <- .Call(C_map_create)
+  key_idx_map <- NULL
   # The backing store for the R objects.
-  values <- list()
+  values <- NULL
   # Indices in the list which are less than n and not currently occupied. These
   # occur when objects are removed from the map.
-  holes <- integer()
-  n_holes <- 0L
+  holes <- NULL
+  n_holes <- NULL
   self <- environment()
+
+  reset <- function() {
+    n <<- 0L
+    key_idx_map <<- .Call(C_map_create)
+    values <<- list()
+    holes <<- integer()
+    n_holes <<- 0L
+  }
+  reset()
 
   set <- function(key, value) {
     idx <- .Call(C_map_get, key_idx_map, key)
@@ -145,6 +154,7 @@ fastmap <- function() {
   }
 
   list(
+    reset = reset,
     set = set,
     mset = mset,
     get = get,
