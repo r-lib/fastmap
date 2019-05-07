@@ -71,7 +71,7 @@ fastmap <- function() {
       compact()
     }
 
-    idx
+    invisible(self)
   }
 
   size <- function() {
