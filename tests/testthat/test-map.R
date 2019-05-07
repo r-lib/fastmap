@@ -1,3 +1,8 @@
+# Given a fastmap object, return the enclosing environment of its methods.
+get_self <- function(m) {
+  environment(m$set)
+}
+
 
 test_that("General correctness", {
   m <- fastmap()
@@ -13,7 +18,7 @@ test_that("General correctness", {
   expect_true(m$exists("foo"))
   expect_false(m$exists("bar"))
   expect_identical(m$size(), 2L)
-  expect_identical(m$size(), length(m$self$values) - m$self$n_holes)
+  expect_identical(m$size(), length(get_self(m)$values) - get_self(m)$n_holes)
 
   # Removal
   m$remove("asdf")
@@ -26,7 +31,7 @@ test_that("General correctness", {
   expect_true(m$exists("foo"))
   expect_false(m$exists("bar"))
   expect_identical(m$size(), 1L)
-  expect_identical(m$size(), length(m$self$values) - m$self$n_holes)
+  expect_identical(m$size(), length(get_self(m)$values) - get_self(m)$n_holes)
 
   # Adding back
   m$set("asdf", list("a", "b"))
@@ -39,7 +44,7 @@ test_that("General correctness", {
   expect_true(m$exists("foo"))
   expect_false(m$exists("bar"))
   expect_identical(m$size(), 2L)
-  expect_identical(m$size(), length(m$self$values) - m$self$n_holes)
+  expect_identical(m$size(), length(get_self(m)$values) - get_self(m)$n_holes)
 
 
   # Replacing existing object
@@ -53,7 +58,7 @@ test_that("General correctness", {
   expect_true(m$exists("foo"))
   expect_false(m$exists("bar"))
   expect_identical(m$size(), 2L)
-  expect_identical(m$size(), length(m$self$values) - m$self$n_holes)
+  expect_identical(m$size(), length(get_self(m)$values) - get_self(m)$n_holes)
 
   # NULL handling
   m$set("asdf", NULL)

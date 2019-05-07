@@ -135,7 +135,6 @@ fastmap <- function() {
     keys = keys,
     size = size,
     as_list = as_list,
-    compact = compact,
-    self = self
+    compact = compact
   )
 }
