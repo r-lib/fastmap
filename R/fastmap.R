@@ -62,14 +62,17 @@ fastmap <- function() {
     idx <- .Call(C_map_remove, key_idx_map, key)
     if (idx == -1L) {
       return(invisible(self))
-    } else {
-      values[idx] <<- list(NULL)
     }
+
+    values[idx] <<- list(NULL)
+    n <<- n - 1L
 
     n_holes <<- n_holes + 1L
     holes[n_holes] <<- idx
 
-    if (n_holes * 2 >= n) {
+    # Shrink the values list if there are more than 20 items and the values list
+    # is more than half holes.
+    if (n > 20 && n_holes * 2 > n) {
       compact()
     }
 
@@ -95,15 +98,17 @@ fastmap <- function() {
 
     keys_idxs <- .Call(C_map_keys_idxs, key_idx_map)
 
-    # Suppose n==5 and holes==c(1,3,5)
-    holes_local <- holes[seq_len(n_holes)]
+    # Suppose values is a length-7 list, n==3, holes==c(4,1,3,NA), n_holes==3
+    # Drop any extra values stored in the holes vector.
+    holes <<- holes[seq_len(n_holes)]
 
-    values <<- values[-holes_local]
+    remap_inv <- seq_len(length(values))
+    remap_inv <- remap_inv[-holes]
+    # remap_inv now is c(2, 5, 6, 7). It will be sorted.
 
-    remap_inv <- seq_len(n)
-    remap_inv <- remap_inv[-holes_local]
-    remap <- integer(n)
+    remap <- integer(length(values))
     remap[remap_inv] <- seq_along(remap_inv)
+    # remap is now c(0,1,0,0,2,3,4). The non-zero values will be sorted.
 
     if (length(keys_idxs) != length(remap_inv)) {
       stop("length mismatch of keys_idxs and remap_inv")
@@ -114,9 +119,9 @@ fastmap <- function() {
       .Call(C_map_set, key_idx_map, keys[i], remap[idx])
     }
 
+    values <<- values[-holes]
     holes <<- integer()
     n_holes <<- 0L
-
     n <<- length(values)
 
     invisible(self)
