@@ -80,7 +80,7 @@ fastmap <- function() {
   }
 
   size <- function() {
-    length(keys())
+    .Call(C_map_size, key_idx_map)
   }
 
   keys <- function() {

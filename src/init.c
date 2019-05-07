@@ -9,6 +9,7 @@ extern SEXP C_map_create();
 extern SEXP C_map_set(SEXP, SEXP, SEXP);
 extern SEXP C_map_get(SEXP, SEXP);
 extern SEXP C_map_remove(SEXP, SEXP);
+extern SEXP C_map_size(SEXP);
 extern SEXP C_map_keys(SEXP);
 extern SEXP C_map_keys_idxs(SEXP);
 
@@ -17,6 +18,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_map_set",                     (DL_FUNC) &C_map_set,              3},
   {"C_map_get",                     (DL_FUNC) &C_map_get,              2},
   {"C_map_remove",                  (DL_FUNC) &C_map_remove,           2},
+  {"C_map_size",                    (DL_FUNC) &C_map_size,             1},
   {"C_map_keys",                    (DL_FUNC) &C_map_keys,             1},
   {"C_map_keys_idxs",               (DL_FUNC) &C_map_keys_idxs,        1},
   {NULL, NULL, 0}
