@@ -1,6 +1,5 @@
-context("correctness")
 
-test_that("", {
+test_that("General correctness", {
   m <- fastmap()
   m$set("asdf", c(1, 2, 3))
   m$set("foo", "blah")
