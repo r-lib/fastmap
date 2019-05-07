@@ -7,7 +7,7 @@ fastmap <- function() {
   n <- 0L
   # Mapping from key (a string) to index into the list that stores the values
   # (which can be any R object).
-  key_idx_map <- map_create()
+  key_idx_map <- .Call(C_map_create)
   # The backing store for the R objects.
   values <- list()
   # Indices in the list which are less than n and not currently occupied. These
@@ -131,28 +131,4 @@ fastmap <- function() {
     compact = compact,
     self = self
   )
-}
-
-
-
-
-
-#' @export
-map_create <- function() {
-  .Call(C_map_create)
-}
-
-#' @export
-map_set <- function(map, key, idx) {
-  .Call(C_map_set, map, key, idx)
-}
-
-#' @export
-map_get <- function(map, key) {
-  .Call(C_map_get, map, key)
-}
-
-#' @export
-map_remove <- function(map, key) {
-  .Call(C_map_remove, map, key)
 }
