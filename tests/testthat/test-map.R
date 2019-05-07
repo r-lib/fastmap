@@ -1,7 +1,5 @@
 context("correctness")
 
-
-library(testthat)
 source(test_path("helpers-expect.R"))
 
 test_that("", {
@@ -17,6 +15,8 @@ test_that("", {
   expect_true(m$exists("asdf"))
   expect_true(m$exists("foo"))
   expect_false(m$exists("bar"))
+  expect_identical(m$size(), 2L)
+  expect_identical(m$size(), length(m$self$values) - m$self$n_holes)
 
   # Removal
   m$remove("asdf")
@@ -28,14 +28,35 @@ test_that("", {
   expect_false(m$exists("asdf"))
   expect_true(m$exists("foo"))
   expect_false(m$exists("bar"))
+  expect_identical(m$size(), 1L)
+  expect_identical(m$size(), length(m$self$values) - m$self$n_holes)
 
-  # Replacement
+  # Adding back
   m$set("asdf", list("a", "b"))
   expect_equal(m$get("asdf"), list("a", "b"))
   expect_contents_identical(
     m$as_list(),
     list("asdf" = list("a", "b"), "foo"= "blah")
   )
+  expect_true(m$exists("asdf"))
+  expect_true(m$exists("foo"))
+  expect_false(m$exists("bar"))
+  expect_identical(m$size(), 2L)
+  expect_identical(m$size(), length(m$self$values) - m$self$n_holes)
+
+
+  # Replacing existing object
+  m$set("asdf", list("x", "y"))
+  expect_equal(m$get("asdf"), list("x", "y"))
+  expect_contents_identical(
+    m$as_list(),
+    list("asdf" = list("x", "y"), "foo"= "blah")
+  )
+  expect_true(m$exists("asdf"))
+  expect_true(m$exists("foo"))
+  expect_false(m$exists("bar"))
+  expect_identical(m$size(), 2L)
+  expect_identical(m$size(), length(m$self$values) - m$self$n_holes)
 
   # NULL handling
   m$set("asdf", NULL)
