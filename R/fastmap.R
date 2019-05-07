@@ -60,7 +60,9 @@ fastmap <- function() {
 
   remove <- function(key) {
     idx <- .Call(C_map_remove, key_idx_map, key)
-    if (idx != -1L) {
+    if (idx == -1L) {
+      return(invisible(self))
+    } else {
       values[idx] <<- list(NULL)
     }
 
