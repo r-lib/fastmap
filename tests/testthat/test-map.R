@@ -32,6 +32,9 @@ test_that("General correctness", {
   expect_false(m$exists("bar"))
   expect_identical(m$size(), 1L)
   expect_identical(m$size(), length(get_self(m)$values) - get_self(m)$n_holes)
+  # Removing non-existent key has no effect
+  m$remove("asdf")
+  expect_equal(m$get("asdf"), NULL) # TODO: return a sentinel value?
 
   # Adding back
   m$set("asdf", list("a", "b"))

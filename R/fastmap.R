@@ -44,6 +44,19 @@ fastmap <- function() {
     invisible(self)
   }
 
+  mset <- function(...) {
+    objs <- list(...)
+    keys <- names(objs)
+    if (is.null(keys) || any(keys == "")) {
+      stop("mset: all values must be named.")
+    }
+    for (i in seq_along(objs)) {
+      set(keys[i], objs[[i]])
+    }
+
+    invisible(self)
+  }
+
   get <- function(key) {
     idx <- .Call(C_map_get, key_idx_map, key)
     if (idx == -1L) {
@@ -51,6 +64,10 @@ fastmap <- function() {
     }
 
     values[[idx]]
+  }
+
+  mget <- function(keys) {
+    lapply(keys, get)
   }
 
   exists <- function(key) {
@@ -129,7 +146,9 @@ fastmap <- function() {
 
   list(
     set = set,
+    mset = mset,
     get = get,
+    mget = mget,
     exists = exists,
     remove = remove,
     keys = keys,
