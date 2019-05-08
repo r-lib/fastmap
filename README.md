@@ -62,3 +62,93 @@ str(m$as_list())
 #> $something
 #> [1] 100 200 300
 ```
+
+
+
+## Memory leak examples
+
+This example shows how using a regular R environment leaks memory, even when simply checking for the existence of a key.
+
+```R
+library(pryr)
+gc()
+start_mem <- mem_used()
+start_time <- as.numeric(Sys.time())
+for (i in 1:8) {
+  cat(i, ": ", sep = "")
+  print(mem_used())
+  e <- new.env(parent = emptyenv())
+  for (j in 1:10000) {
+    # Generate random key
+    x <- as.character(runif(1))
+    exists(x, envir = e, inherits = FALSE)
+  }
+  rm(e, x)
+}
+end_time <- as.numeric(Sys.time())
+gc()
+end_mem <- mem_used()
+cat("Elapsed time:", round(end_time - start_time, 1), "seconds")
+cat("Memory leaked:", end_mem - start_mem, "bytes")
+```
+
+The output looks something like this:
+
+```
+1: 57.9 MB
+2: 59.9 MB
+3: 61.9 MB
+4: 64.4 MB
+5: 66.4 MB
+6: 68.4 MB
+7: 70.4 MB
+8: 72.4 MB
+Elapsed time: 1.1 seconds
+Memory leaked: 16243656 bytes
+```
+
+The elapsed time gets progressively slower as the R symbol table gets larger and larger. After running the above code repeatedly, the elapsed time for the fifth run is 3.1 seconds.
+
+
+For comparison, this example with fastmap is similar but does a little bit more. In each iteration, it checks for the existence of an object, sets a key-value pair.
+
+```R
+library(fastmap)
+library(pryr)
+gc()
+start_mem <- mem_used()
+start_time <- as.numeric(Sys.time())
+for (i in 1:8) {
+  cat(i, ": ", sep = "")
+  print(mem_used())
+  m <- fastmap()
+  for (j in 1:10000) {
+    x <- as.character(runif(1))
+    m$exists(x)
+    m$set(x, x)
+  }
+  rm(m, x)
+}
+end_time <- as.numeric(Sys.time())
+gc()
+end_mem <- mem_used()
+cat("Elapsed time:", round(end_time - start_time, 1), "seconds")
+cat("Memory leaked:", end_mem - start_mem, "bytes")
+```
+
+The output looks something like this (note that this is from the second run of the code above -- for the first run, there is an increase in memory used, but I think it's probably related to code being run for the first time in the R session):
+
+```
+1: 42.3 MB
+2: 42.3 MB
+3: 42.3 MB
+4: 42.3 MB
+5: 42.3 MB
+6: 42.3 MB
+7: 42.3 MB
+8: 42.3 MB
+Elapsed time: 1.5 seconds
+Memory leaked: 0 bytes
+```
+
+It does not leak memory, and it does not slow down if you run it repeatedly. After running it ten times, it still takes 1.5 seconds, and leaks no memory.
