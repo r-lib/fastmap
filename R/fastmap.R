@@ -29,14 +29,16 @@ fastmap <- function() {
     idx <- .Call(C_map_get, key_idx_map, key)
 
     if (idx == -1L) {
-      # This is a new key. If we have any holes in our values list, store it
-      # there. Otherwise append to the end of the values list.
+      # This is a new key.
+      n <<- n + 1L
+
+      # If we have any holes in our values list, store it there. Otherwise
+      # append to the end of the values list.
       if (n_holes != 0L) {
         idx <- holes[n_holes]
         holes[n_holes] <<- NA_integer_   # Mark as NA, for safety
         n_holes <<- n_holes - 1L
       } else {
-        n <<- n + 1L
         idx <- n
       }
       .Call(C_map_set, key_idx_map, key, idx)
