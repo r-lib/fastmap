@@ -68,7 +68,7 @@ extern "C" {
     si_map* map = (si_map*) R_ExternalPtrAddr(map_xptr);
     const char* key = CHAR(STRING_ELT(key_r, 0));
 
-    si_map::const_iterator it = map->find(key);
+    si_map::iterator it = map->find(key);
     if (it == map->end()) {
       return Rf_ScalarInteger(-1);
     } else {
