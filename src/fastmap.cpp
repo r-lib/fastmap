@@ -7,9 +7,20 @@ typedef std::map<std::string, int> si_map;
 
 
 extern "C" {
+  si_map* map_from_xptr(SEXP map_xptr) {
+    if (TYPEOF(map_xptr) != EXTPTRSXP) {
+      error("map_xptr must be an external pointer.");
+    }
+    si_map* map = (si_map*) R_ExternalPtrAddr(map_xptr);
+    if (!map) {
+      error("fastmap: external pointer to string-to-index map is null.");
+    }
+
+    return map;
+  }
 
   void map_finalizer(SEXP map_xptr) {
-    si_map* map = (si_map*) R_ExternalPtrAddr(map_xptr);
+    si_map* map = map_from_xptr(map_xptr);
     delete map;
     R_ClearExternalPtr(map_xptr);
   }
@@ -33,8 +44,8 @@ extern "C" {
       error("idx must be a one-element integer vector");
     }
 
-    si_map* map = (si_map*) R_ExternalPtrAddr(map_xptr);
     const char* key = CHAR(STRING_ELT(key_r, 0));
+    si_map* map = map_from_xptr(map_xptr);
     int idx = INTEGER(idx_r)[0];
 
     (*map)[key] = idx;
@@ -48,7 +59,7 @@ extern "C" {
       error("key must be a one-element character vector");
     }
 
-    si_map* map = (si_map*) R_ExternalPtrAddr(map_xptr);
+    si_map* map = map_from_xptr(map_xptr);
     const char* key = CHAR(STRING_ELT(key_r, 0));
 
     si_map::const_iterator it = map->find(key);
@@ -65,7 +76,7 @@ extern "C" {
       error("key must be a one-element character vector");
     }
 
-    si_map* map = (si_map*) R_ExternalPtrAddr(map_xptr);
+    si_map* map = map_from_xptr(map_xptr);
     const char* key = CHAR(STRING_ELT(key_r, 0));
 
     si_map::iterator it = map->find(key);
@@ -79,12 +90,12 @@ extern "C" {
   }
 
   SEXP C_map_size(SEXP map_xptr) {
-    si_map* map = (si_map*) R_ExternalPtrAddr(map_xptr);
+    si_map* map = map_from_xptr(map_xptr);
     return(Rf_ScalarInteger(map->size()));
   }
 
   SEXP C_map_keys(SEXP map_xptr) {
-    si_map* map = (si_map*) R_ExternalPtrAddr(map_xptr);
+    si_map* map = map_from_xptr(map_xptr);
     SEXP keys =  PROTECT(Rf_allocVector(STRSXP, map->size()));
 
     int i = 0;
@@ -97,7 +108,7 @@ extern "C" {
   }
 
   SEXP C_map_keys_idxs(SEXP map_xptr) {
-    si_map* map = (si_map*) R_ExternalPtrAddr(map_xptr);
+    si_map* map = map_from_xptr(map_xptr);
     SEXP keys = PROTECT(Rf_allocVector(STRSXP, map->size()));
     SEXP idxs = PROTECT(Rf_allocVector(INTSXP, map->size()));
 
