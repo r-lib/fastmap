@@ -55,8 +55,8 @@ fastmap <- function() {
     invisible(self)
   }
 
-  mset <- function(...) {
-    objs <- list(...)
+  mset <- function(..., .list = NULL) {
+    objs <- c(list(...), .list)
     keys <- names(objs)
     if (is.null(keys) || any(keys == "")) {
       stop("mset: all values must be named.")
@@ -78,6 +78,7 @@ fastmap <- function() {
   }
 
   mget <- function(keys) {
+    names(keys) <- keys
     lapply(keys, get)
   }
 
