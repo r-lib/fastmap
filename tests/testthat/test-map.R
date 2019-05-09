@@ -72,3 +72,31 @@ test_that("General correctness", {
     list("asdf" = NULL, "foo"= "blah")
   )
 })
+
+
+test_that("reset", {
+  m <- fastmap()
+  m$set("a", 1)
+  m$set("b", 2)
+  m$reset()
+  expect_equal(m$as_list(), list(a=1)[0])
+  expect_equal(m$size(), 0)
+})
+
+
+test_that("mset and mget", {
+  m <- fastmap()
+  m$set("c", 3)
+  m$mset(b = -2, a = 1)
+  m$mset(b = 2, .list = list(e = 5))
+
+  expect_mapequal(
+    m$as_list(),
+    list(a=1, b=2, c=3, e=5)
+  )
+
+  expect_equal(
+    m$mget(c("e", "c", "a")),
+    list(e=5, c=3, a=1)
+  )
+})
