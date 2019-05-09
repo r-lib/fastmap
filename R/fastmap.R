@@ -124,7 +124,9 @@ fastmap <- function() {
 
   as_list <- function() {
     keys_idxs <- .Call(C_map_keys_idxs, key_idx_map)
-    setNames(values[keys_idxs], names(keys_idxs))
+    result <- values[keys_idxs]
+    names(result) <- names(keys_idxs)
+    result
   }
 
   compact <- function() {
