@@ -86,7 +86,7 @@ fastmap <- function() {
     return(idx != -1L)
   }
 
-  remove <- function(key) {
+  remove_one <- function(key) {
     idx <- .Call(C_map_remove, key_idx_map, key)
     if (idx == -1L) {
       return(invisible(self))
@@ -104,6 +104,13 @@ fastmap <- function() {
       compact()
     }
 
+    NULL
+  }
+
+  remove <- function(keys) {
+    for (key in keys) {
+      remove_one(key)
+    }
     invisible(self)
   }
 
