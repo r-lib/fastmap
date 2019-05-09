@@ -64,6 +64,13 @@ str(m$as_list())
 ```
 
 
+## Notes
+
+One important difference between using a `fastmap` object vs. an environment-backed map is that a fastmap can't be serialized since it includes an external pointer. That means that it can't be saved in one R session and restored in another. (It may be possible in the future to make this work.)
+
+In a package, if a fastmap object is used, it can't be created and stored at build time. Instead of creating a fastmap object at build time, it should be created each time the package is loaded, in the package's `.onLoad()` function.
+
+
 
 ## Memory leak examples
 
