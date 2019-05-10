@@ -1,8 +1,16 @@
 #' @useDynLib fastmap, .registration = TRUE
 NULL
 
+
+#' Create a fastmap object
+#'
+#' @param missing The value to return when \code{get()} is called with a key
+#'   that is not in the map. The default is \code{NULL}, but in some cases it
+#'   can be useful to return a sentinel value, such as a
+#'   \code{\link{key_missing}} object.
+#'
 #' @export
-fastmap <- function() {
+fastmap <- function(missing = NULL) {
   # Number of items currently stored in the fastmap object.
   n <- NULL
   # Mapping from key (a string) to index into the list that stores the values
@@ -178,4 +186,33 @@ fastmap <- function() {
     as_list = as_list,
     compact = compact
   )
+}
+
+
+#' A Key Missing object
+#'
+#' A \code{key_missing} object represents a missing key.
+#'
+#' @param x An object to test.
+#'
+#' @seealso \code{\link{diskCache}}, \code{\link{memoryCache}}.
+#'
+#' @export
+key_missing <- function() {
+  # Note: this is more verbose, but much faster than
+  # structure(list(), class = "key_missing")
+  x <- list()
+  class(x) <- "key_missing"
+  x
+}
+
+#' @rdname key_missing
+#' @export
+is.key_missing <- function(x) {
+  inherits(x, "key_missing")
+}
+
+#' @export
+print.key_missing <- function(x, ...) {
+  cat("<Key Missing>\n")
 }
