@@ -79,7 +79,7 @@ fastmap <- function(missing = NULL) {
   get <- function(key) {
     idx <- .Call(C_map_get, key_idx_map, key)
     if (idx == -1L) {
-      return(NULL)
+      return(missing)
     }
 
     values[[idx]]

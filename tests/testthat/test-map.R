@@ -100,3 +100,13 @@ test_that("mset and mget", {
     list(e=5, c=3, a=1)
   )
 })
+
+
+test_that("Missing keys", {
+  m <- fastmap()
+  expect_identical(m$get("a"), NULL)
+
+  m <- fastmap(missing = key_missing())
+  expect_identical(m$get("a"), key_missing())
+  expect_true(is.key_missing(m$get("a")))
+})
