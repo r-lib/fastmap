@@ -190,9 +190,10 @@ fastmap <- function(missing_default = NULL) {
     n_holes <<- n_holes + 1L
     holes[n_holes] <<- idx
 
-    # Shrink the values list if there are more than 20 items and the values list
-    # is more than half holes.
-    if (n > 20 && n_holes * 2 > n) {
+    # Shrink the values list if its length is larger than 40 and it is half or
+    # more empty.
+    values_length <- length(values)
+    if (values_length > 40L  &&  values_length >= n * 2L) {
       compact()
     }
 
