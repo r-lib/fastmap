@@ -263,8 +263,6 @@ fastmap <- function(missing_default = NULL) {
 #'
 #' @param x An object to test.
 #'
-#' @seealso \code{\link{diskCache}}, \code{\link{memoryCache}}.
-#'
 #' @export
 key_missing <- function() {
   # Note: this is more verbose, but much faster than

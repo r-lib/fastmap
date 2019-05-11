@@ -15,6 +15,3 @@ is.key_missing(x)
 \description{
 A \code{key_missing} object represents a missing key.
 }
-\seealso{
-\code{\link{diskCache}}, \code{\link{memoryCache}}.
-}
