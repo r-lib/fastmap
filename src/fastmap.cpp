@@ -33,7 +33,7 @@ extern "C" {
     }
     SEXP key_c = PROTECT(STRING_ELT(key_r, 0));
     if (key_c == NA_STRING || Rf_StringBlank(key_c)) {
-      error("key must be a string other than NA or \"\"");
+      error("key must be not be \"\" or NA");
     }
     UNPROTECT(1);
     return CHAR(key_c);
