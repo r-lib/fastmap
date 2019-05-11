@@ -38,11 +38,14 @@ NULL
 #'     the \code{keys} passed in, in the same order. For keys not in the map,
 #'     they will have \code{missing} for their value.
 #'   }
-#'   \item{\code{exists(key)}}{
-#'     Returns \code{TRUE} if \code{key} is in the map, \code{FALSE} otherwise.
+#'   \item{\code{exists(keys)}}{
+#'     Given a vector of keys, returns a logical vector reporting whether each
+#'     key is contained in the map.
 #'   }
-#'   \item{\code{remove(key)}}{
-#'     Remove \code{key} and the corresponding value from the map.
+#'   \item{\code{remove(keys)}}{
+#'     Given a vector of keys, remove the key-value pairs from the map. Returns
+#'     a logical vector reporting whether each item existed in (and was removed
+#'     from) the map.
 #'   }
 #'   \item{\code{keys()}}{
 #'     Returns a character vector of all the keys, in unspecified order.
@@ -168,14 +171,14 @@ fastmap <- function(missing_default = NULL) {
     if (!(is.character(keys) || is.null(keys))) {
       stop("mget: `keys` must be a character vector or NULL")
     }
-    vapply(keys, exists_one, TRUE)
+    vapply(keys, exists_one, FUN.VALUE = TRUE, USE.NAMES = FALSE)
   }
 
   # This is only visible internally.
   remove_one <- function(key) {
     idx <- .Call(C_map_remove, key_idx_map, key)
     if (idx == -1L) {
-      return(invisible(self))
+      return(FALSE)
     }
 
     values[idx] <<- list(NULL)
@@ -191,7 +194,7 @@ fastmap <- function(missing_default = NULL) {
       compact()
     }
 
-    NULL
+    TRUE
   }
 
   remove <- function(keys) {
@@ -201,10 +204,7 @@ fastmap <- function(missing_default = NULL) {
     if (any(keys == "") || any(is.na(keys))) {
       stop('mget: `keys` must not be "" or NA')
     }
-    for (key in keys) {
-      remove_one(key)
-    }
-    invisible(self)
+    vapply(keys, remove_one, FUN.VALUE = TRUE, USE.NAMES = FALSE)
   }
 
   size <- function() {

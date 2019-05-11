@@ -16,7 +16,7 @@ test_that("General correctness", {
   expect_identical(m$size(), length(get_self(m)$values) - get_self(m)$n_holes)
 
   # Removal
-  m$remove("asdf")
+  expect_true(m$remove("asdf"))
   expect_equal(m$get("asdf"), NULL)
   expect_mapequal(
     m$as_list(),
@@ -28,7 +28,7 @@ test_that("General correctness", {
   expect_identical(m$size(), 1L)
   expect_identical(m$size(), length(get_self(m)$values) - get_self(m)$n_holes)
   # Removing non-existent key has no effect
-  m$remove("asdf")
+  expect_false(m$remove("asdf"))
   expect_equal(m$get("asdf"), NULL)
 
   # Adding back
@@ -79,20 +79,42 @@ test_that("reset", {
 })
 
 
-test_that("mset and mget", {
+test_that("Vectorized operations", {
   m <- fastmap()
   m$set("c", 3)
   m$mset(b = -2, a = 1)
   m$mset(b = 2, .list = list(e = 5))
 
+  # Order does not matter for as_list()
   expect_mapequal(
     m$as_list(),
     list(a=1, b=2, c=3, e=5)
   )
 
+  # Order matters for mget()
   expect_equal(
     m$mget(c("e", "c", "a")),
     list(e=5, c=3, a=1)
+  )
+
+  expect_identical(
+    m$exists(c("e", "a", "x", "a", "y")),
+    c(TRUE, TRUE, FALSE, TRUE, FALSE)
+  )
+
+  # Note that when removing a duplicated key, like "a" here, it reports TRUE for
+  # the first instance, and FALSE for the second, because it was removed when
+  # the algorithm iterated through the vector and encountered it the first time.
+  # I'm not sure if that's the way it should be, or if it would be better to
+  # report TRUE both times, but that is how it currently works.
+  expect_identical(
+    m$remove(c("e", "a", "x", "a", "y")),
+    c(TRUE, TRUE, FALSE, FALSE, FALSE)
+  )
+
+  expect_mapequal(
+    m$as_list(),
+    list(b=2, c=3)
   )
 })
 
