@@ -91,10 +91,10 @@ test_that("Vectorized operations", {
     list(a=1, b=2, c=3, e=5)
   )
 
-  # Order matters for mget()
-  expect_equal(
-    m$mget(c("e", "c", "a")),
-    list(e=5, c=3, a=1)
+  # Order matters for mget(), and keys can be duplicated
+  expect_identical(
+    m$mget(c("e", "c", "a", "e")),
+    list(e=5, c=3, a=1, e=5)
   )
 
   expect_identical(
