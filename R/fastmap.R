@@ -57,12 +57,6 @@ NULL
 #'   \item{\code{reset()}}{
 #'     Reset the fastmap object, clearing all items.
 #'   }
-#'   \item{\code{compact()}}{
-#'     The backing store for the values in a fastmap is a list, which can
-#'     sometimes be larger than strictly needed to store the values. This tells
-#'     it to reduce the size of the list so that it is exactly the right size
-#'     to store the values. (This is mostly for testing; not for general use.)
-#'   }
 #' }
 #'
 #' @param missing_default The value to return when \code{get()} is called with a
@@ -273,8 +267,7 @@ fastmap <- function(missing_default = NULL) {
     remove = remove,
     keys = keys,
     size = size,
-    as_list = as_list,
-    compact = compact
+    as_list = as_list
   )
 }
 
