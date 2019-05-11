@@ -76,6 +76,17 @@ NULL
 fastmap <- function(missing_default = NULL) {
   force(missing_default)
 
+  # ===================================
+  # Constants
+  # ===================================
+  INITIAL_SIZE <- 32L
+  GROWTH_FACTOR <- 1.2
+  SHRINK_FACTOR <- 2
+
+  # ===================================
+  # Internal state
+  # ===================================
+
   # Number of items currently stored in the fastmap object.
   n <- NULL
   # Mapping from key (a string) to index into the list that stores the values
@@ -84,17 +95,24 @@ fastmap <- function(missing_default = NULL) {
   # The backing store for the R objects.
   values <- NULL
   # Indices in the list which are less than n and not currently occupied. These
-  # occur when objects are removed from the map.
+  # occur when objects are removed from the map. When a hole is filled, the
+  # entry is replaced with NA, and n_holes is updated to reflect it; this is
+  # instead of simply shrinking the holes vector, because that involves copying
+  # the entire object.
   holes <- NULL
   n_holes <- NULL
   self <- environment()
 
+  # ===================================
+  # Methods
+  # ===================================
+
   reset <- function() {
     n <<- 0L
     key_idx_map <<- .Call(C_map_create)
-    values <<- list()
-    holes <<- integer()
-    n_holes <<- 0L
+    values <<- vector(mode = "list", INITIAL_SIZE)
+    holes <<- seq_len(INITIAL_SIZE)
+    n_holes <<- INITIAL_SIZE
     invisible(NULL)
   }
   reset()
@@ -113,13 +131,17 @@ fastmap <- function(missing_default = NULL) {
 
       # If we have any holes in our values list, store it there. Otherwise
       # append to the end of the values list.
-      if (n_holes != 0L) {
-        idx <- holes[n_holes]
-        holes[n_holes] <<- NA_integer_   # Mark as NA, for safety
-        n_holes <<- n_holes - 1L
-      } else {
+      if (n_holes == 0L) {
         idx <- n
+        # If we got here, we need to grow. This grows values, and holes is
+        # updated to track it.
+        grow()
       }
+
+      idx <- holes[n_holes]
+      holes[n_holes] <<- NA_integer_   # Mark as NA, for safety
+      n_holes <<- n_holes - 1L
+
       .Call(C_map_set, key_idx_map, key, idx)
     }
 
@@ -190,11 +212,11 @@ fastmap <- function(missing_default = NULL) {
     n_holes <<- n_holes + 1L
     holes[n_holes] <<- idx
 
-    # Shrink the values list if its length is larger than 40 and it is half or
+    # Shrink the values list if its length is larger than 32 and it is half or
     # more empty.
     values_length <- length(values)
-    if (values_length > 40L  &&  values_length >= n * 2L) {
-      compact()
+    if (values_length > INITIAL_SIZE  &&  values_length >= n * SHRINK_FACTOR) {
+      shrink()
     }
 
     TRUE
@@ -225,8 +247,30 @@ fastmap <- function(missing_default = NULL) {
     result
   }
 
+
   # Internal function
-  compact <- function() {
+  grow <- function() {
+    old_values_length <- length(values)
+    new_values_length <- as.integer(ceiling(old_values_length * GROWTH_FACTOR))
+
+    # Increase size of values list by assigning NULL past the end. On R 3.4 and
+    # up, this will grow it in place.
+    values[new_values_length] <<- list(NULL)
+
+    # When grow() is called, `holes` is all NAs, but it's not as long as values.
+    # Grow it (possibly in place, depending on R version) to new_values_length,
+    # and have it point to all the new empty spaces in `values`. Strictly
+    # speaking, it doesn't have to be as large as new_values_length -- it only
+    # needs to be of size (new_values_length - new_values_length /
+    # SHRINK_FACTOR), but it's possible that there will be a rounding error and
+    # I'm playing it safe here.
+    holes[new_values_length] <<- NA_integer_
+    n_holes <<- new_values_length - old_values_length
+    holes[seq_len(n_holes)] <<- seq.int(from = old_values_length + 1, to = new_values_length)
+  }
+
+  # Internal function
+  shrink <- function() {
     if (n_holes == 0L)
       return(invisible(self))
 
