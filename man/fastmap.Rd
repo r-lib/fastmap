@@ -32,11 +32,12 @@ Fastmap objects have the following methods:
 
 \describe{
   \item{\code{set(key, value)}}{
-    Set a key-value pair. \code{key} must be a string.
+    Set a key-value pair. \code{key} must be a string. Returns \code{value}.
   }
   \item{\code{mset(..., .list = NULL)}}{
     Set multiple key-value pairs. The key-value pairs are named arguments,
-    and/or a list passed in as \code{.list}.
+    and/or a list passed in as \code{.list}. Returns a named list where the
+    names are the keys, and the values are the values.
   }
   \item{\code{get(key, missing = missing_default)}}{
     Get a value corresponding to \code{key}. If the key is not in the map,
@@ -48,11 +49,14 @@ Fastmap objects have the following methods:
     the \code{keys} passed in, in the same order. For keys not in the map,
     they will have \code{missing} for their value.
   }
-  \item{\code{exists(key)}}{
-    Returns \code{TRUE} if \code{key} is in the map, \code{FALSE} otherwise.
+  \item{\code{exists(keys)}}{
+    Given a vector of keys, returns a logical vector reporting whether each
+    key is contained in the map.
   }
-  \item{\code{remove(key)}}{
-    Remove \code{key} and the corresponding value from the map.
+  \item{\code{remove(keys)}}{
+    Given a vector of keys, remove the key-value pairs from the map. Returns
+    a logical vector reporting whether each item existed in (and was removed
+    from) the map.
   }
   \item{\code{keys()}}{
     Returns a character vector of all the keys, in unspecified order.
@@ -66,12 +70,6 @@ Fastmap objects have the following methods:
   }
   \item{\code{reset()}}{
     Reset the fastmap object, clearing all items.
-  }
-  \item{\code{compact()}}{
-    The backing store for the values in a fastmap is a list, which can
-    sometimes be larger than strictly needed to store the values. This tells
-    it to reduce the size of the list so that it is exactly the right size
-    to store the values. (This is mostly for testing; not for general use.)
   }
 }
 }
