@@ -1,8 +1,8 @@
 
 test_that("General correctness", {
   m <- fastmap()
-  m$set("asdf", c(1, 2, 3))
-  m$set("foo", "blah")
+  expect_identical(m$set("asdf", c(1, 2, 3)), c(1, 2, 3))
+  expect_identical(m$set("foo", "blah"), "blah")
 
   expect_equal(m$get("asdf"), c(1, 2, 3))
   expect_mapequal(
@@ -81,9 +81,9 @@ test_that("reset", {
 
 test_that("Vectorized operations", {
   m <- fastmap()
-  m$set("c", 3)
-  m$mset(b = -2, a = 1)
-  m$mset(b = 2, .list = list(e = 5))
+  expect_identical(m$set("c", 3), 3)
+  expect_identical(m$mset(b = -2, a = 1), list(b = -2, a = 1))
+  expect_identical(m$mset(b = 2, .list = list(e = 5)), list(b = 2, e = 5))
 
   # Order does not matter for as_list()
   expect_mapequal(

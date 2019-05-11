@@ -22,11 +22,12 @@ NULL
 #'
 #' \describe{
 #'   \item{\code{set(key, value)}}{
-#'     Set a key-value pair. \code{key} must be a string.
+#'     Set a key-value pair. \code{key} must be a string. Returns \code{value}.
 #'   }
 #'   \item{\code{mset(..., .list = NULL)}}{
 #'     Set multiple key-value pairs. The key-value pairs are named arguments,
-#'     and/or a list passed in as \code{.list}.
+#'     and/or a list passed in as \code{.list}. Returns a named list where the
+#'     names are the keys, and the values are the values.
 #'   }
 #'   \item{\code{get(key, missing = missing_default)}}{
 #'     Get a value corresponding to \code{key}. If the key is not in the map,
@@ -94,6 +95,7 @@ fastmap <- function(missing_default = NULL) {
     values <<- list()
     holes <<- integer()
     n_holes <<- 0L
+    invisible(NULL)
   }
   reset()
 
@@ -129,7 +131,7 @@ fastmap <- function(missing_default = NULL) {
       values[[idx]] <<- value
     }
 
-    invisible(self)
+    invisible(value)
   }
 
   mset <- function(..., .list = NULL) {
@@ -142,7 +144,7 @@ fastmap <- function(missing_default = NULL) {
       set(keys[i], objs[[i]])
     }
 
-    invisible(self)
+    invisible(objs)
   }
 
   get <- function(key, missing = missing_default) {
@@ -162,6 +164,7 @@ fastmap <- function(missing_default = NULL) {
     lapply(keys, get, missing)
   }
 
+  # Internal function
   exists_one <- function(key) {
     idx <- .Call(C_map_get, key_idx_map, key)
     return(idx != -1L)
@@ -174,7 +177,7 @@ fastmap <- function(missing_default = NULL) {
     vapply(keys, exists_one, FUN.VALUE = TRUE, USE.NAMES = FALSE)
   }
 
-  # This is only visible internally.
+  # Internal function
   remove_one <- function(key) {
     idx <- .Call(C_map_remove, key_idx_map, key)
     if (idx == -1L) {
@@ -222,6 +225,7 @@ fastmap <- function(missing_default = NULL) {
     result
   }
 
+  # Internal function
   compact <- function() {
     if (n_holes == 0L)
       return(invisible(self))
