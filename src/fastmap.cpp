@@ -94,11 +94,6 @@ extern "C" {
     }
   }
 
-  SEXP C_map_size(SEXP map_xptr) {
-    si_map* map = map_from_xptr(map_xptr);
-    return(Rf_ScalarInteger(map->size()));
-  }
-
   SEXP C_map_keys(SEXP map_xptr) {
     si_map* map = map_from_xptr(map_xptr);
     SEXP keys = PROTECT(Rf_allocVector(STRSXP, map->size()));

@@ -214,7 +214,7 @@ fastmap <- function(missing_default = NULL) {
   }
 
   size <- function() {
-    .Call(C_map_size, key_idx_map)
+    n
   }
 
   keys <- function() {
