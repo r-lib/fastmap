@@ -1,2 +1,4 @@
 ^fastmap\.Rproj$
 ^\.Rproj\.user$
+\.sublime-project$
+\.sublime-workspace$
