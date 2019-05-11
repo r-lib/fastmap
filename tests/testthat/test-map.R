@@ -105,8 +105,24 @@ test_that("mset and mget", {
 test_that("Missing keys", {
   m <- fastmap()
   expect_identical(m$get("a"), NULL)
+  expect_identical(m$get("a", missing = key_missing()), key_missing())
+  expect_identical(m$mget(c("a", "b")), list(a = NULL, b = NULL))
+  expect_identical(
+    m$mget(c("a", "b"), missing = key_missing()),
+    list(a = key_missing(), b = key_missing())
+  )
 
-  m <- fastmap(missing = key_missing())
+  # With a different default for missing
+  m <- fastmap(missing_default = key_missing())
   expect_identical(m$get("a"), key_missing())
   expect_true(is.key_missing(m$get("a")))
+
+  expect_identical(m$get("a", missing = NULL), NULL)
+  expect_identical(m$get("a"), key_missing())
+  expect_identical(m$mget(c("a", "b")), list(a = key_missing(), b = key_missing()))
+  expect_identical(
+    m$mget(c("a", "b"), missing = NULL),
+    list(a = NULL, b = NULL)
+  )
+
 })

@@ -4,14 +4,79 @@
 \alias{fastmap}
 \title{Create a fastmap object}
 \usage{
-fastmap(missing = NULL)
+fastmap(missing_default = NULL)
 }
 \arguments{
-\item{missing}{The value to return when \code{get()} is called with a key
-that is not in the map. The default is \code{NULL}, but in some cases it
-can be useful to return a sentinel value, such as a
+\item{missing_default}{The value to return when \code{get()} is called with a
+key that is not in the map. The default is \code{NULL}, but in some cases
+it can be useful to return a sentinel value, such as a
 \code{\link{key_missing}} object.}
 }
 \description{
-Create a fastmap object
+A fastmap object provides a key-value store where the keys are strings and
+the values are any R objects.
+}
+\details{
+In R, it is common to use environments as key-value stores, but they can leak
+memory: every time a new key is used, R registers it in its global symbol
+table, which only grows and is never garbage collected. If many different
+keys are used, this can cause a non-trivial amount of memory leakage.
+
+Fastmap objects do not use the symbol table and do not leak memory.
+
+One important difference between environments and fastmaps is that
+environments can be serialized and restored in another R session, while
+fastmaps cannot (though this may be added in the future).
+
+Fastmap objects have the following methods:
+
+\describe{
+  \item{\code{set(key, value)}}{
+    Set a key-value pair. \code{key} must be a string.
+  }
+  \item{\code{mset(..., .list = NULL)}}{
+    Set multiple key-value pairs. The key-value pairs are named arguments,
+    and/or a list passed in as \code{.list}.
+  }
+  \item{\code{get(key, missing = missing_default)}}{
+    Get a value corresponding to \code{key}. If the key is not in the map,
+    return \code{missing}.
+  }
+  \item{\code{mget(keys, missing = missing_default)}}{
+    Get values corresponding to \code{keys}, which is a character vector. The
+    values will be returned in a named list where the names are the same as
+    the \code{keys} passed in, in the same order. For keys not in the map,
+    they will have \code{missing} for their value.
+  }
+  \item{\code{exists(key)}}{
+    Returns \code{TRUE} if \code{key} is in the map, \code{FALSE} otherwise.
+  }
+  \item{\code{remove(key)}}{
+    Remove \code{key} and the corresponding value from the map.
+  }
+  \item{\code{keys()}}{
+    Returns a character vector of all the keys, in unspecified order.
+  }
+  \item{\code{size()}}{
+    Returns the number of items in the map.
+  }
+  \item{\code{as_list()}}{
+    Return a named list where the names are the keys from the map, and the
+    values are the values, in unspecified order.
+  }
+  \item{\code{reset()}}{
+    Reset the fastmap object, clearing all items.
+  }
+  \item{\code{compact()}}{
+    The backing store for the values in a fastmap is a list, which can
+    sometimes be larger than strictly needed to store the values. This tells
+    it to reduce the size of the list so that it is exactly the right size
+    to store the values. (This is mostly for testing; not for general use.)
+  }
+}
+}
+\examples{
+# Create the fastmap object
+m <- fastmap()
+
 }

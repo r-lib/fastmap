@@ -23,28 +23,34 @@ library(fastmap)
 m <- fastmap()
 
 # Set some key-value pairs
-m$set("key_1", 100)
-m$set("abc", c("a", "b", "c"))
-m$set("something", c(100, 200, 300))
+m$set("x", 100)
+m$set("letters", c("a", "b", "c"))
+m$mset(numbers = c(10, 20, 30), nothing = NULL)
 
 # Get values using keys
-m$get("key_1")
+m$get("x")
 #> [1] 100
-m$get("abc")
+m$get("numbers")
+#> [1] 10 20 30
+m$mget(c("letters", "numbers"))
+#> $letters
 #> [1] "a" "b" "c"
+#> 
+#> $numbers
+#> [1] 10 20 30
 
-# Missing keys currently return NULL (may change in the future)
+# Missing keys return NULL by default, but this can be customized
 m$get("xyz")
 #> NULL
 
 # Check for existence of keys
-m$exists("abc")
+m$exists("x")
 #> [1] TRUE
 m$exists("xyz")
 #> [1] FALSE
 
-# Remove items
-m$remove("abc")
+# Remove one or more items
+m$remove(c("letters", "x"))
 
 # Return number of items
 m$size()
@@ -52,15 +58,30 @@ m$size()
 
 # Get all keys
 m$keys()
-#> [1] "key_1"     "something"
+#> [1] "nothing" "numbers"
 
 # Return named list that represents all key-value pairs
 str(m$as_list())
-#> $key_1
-#> [1] 100
-#> 
-#> $something
-#> [1] 100 200 300
+#> List of 3
+#>  $ nothing: NULL
+#>  $ numbers: num [1:3] 10 20 30
+
+# Clear the map
+m$reset()
+```
+
+By default, `get()` returns `NULL` for keys that aren't present. You can instead specify a sentinel value to return for missing keys, either when the fastmap is created, or when \code{get()} is called. For example, you can return a \code{key_missing()} object to represent missing values:
+
+```R
+# Specify missing value when get() is called
+m <- fastmap()
+m$get("x", missing = key_missing())
+#> <Key Missing>
+
+# Setting the default missing value
+m <- fastmap(missing_default = key_missing())
+m$get("x")
+#> <Key Missing>
 ```
 
 
@@ -69,7 +90,6 @@ str(m$as_list())
 One important difference between using a `fastmap` object vs. an environment-backed map is that a fastmap can't be serialized since it includes an external pointer. That means that it can't be saved in one R session and restored in another. (It may be possible in the future to make this work.)
 
 In a package, if a fastmap object is used, it can't be created and stored at build time. Instead of creating a fastmap object at build time, it should be created each time the package is loaded, in the package's `.onLoad()` function.
-
 
 
 ## Memory leak examples
