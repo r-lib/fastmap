@@ -165,9 +165,16 @@ fastmap <- function(missing_default = NULL) {
     lapply(keys, get, missing)
   }
 
-  exists <- function(key) {
+  exists_one <- function(key) {
     idx <- .Call(C_map_get, key_idx_map, key)
     return(idx != -1L)
+  }
+
+  exists <- function(keys) {
+    if (!(is.character(keys) || is.null(keys))) {
+      stop("mget: `keys` must be a character vector or NULL")
+    }
+    vapply(keys, exists_one, TRUE)
   }
 
   # This is only visible internally.

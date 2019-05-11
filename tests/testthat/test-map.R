@@ -157,9 +157,10 @@ test_that("Malformed keys", {
   expect_error(m$exists(NA_character_))
   expect_error(m$exists(NA_integer_))
   expect_error(m$exists(""))
-  expect_error(m$exists(character(0)))
+  # exists() is a bit more lenient than get() because it accepts a vector.
+  expect_silent(m$exists(character(0)))
+  expect_silent(m$exists(NULL))
   expect_error(m$exists(numeric(0)))
-  expect_error(m$exists(NULL))
 
   expect_error(m$remove(NA_character_))
   expect_error(m$remove(NA_integer_))
@@ -168,18 +169,6 @@ test_that("Malformed keys", {
   m$remove(character(0))
   m$remove(NULL)
   expect_error(m$remove(numeric(0)))
-
-  # Operations with multiple keys -- one bad key stops the entire thing from
-  # happening.
-  expect_error(m$mset(a=1, 2, c=3))
-  expect_true(length(m$as_list()) == 0)
-
-  expect_error(m$mget(c("a", NA, "c")))
-
-  # When removing multiple, one bad key stops all from being removed.
-  m$mset(a=1, b=2, c=3)
-  expect_error(m$remove(c("a", NA, "c")))
-  expect_mapequal(m$as_list(), list(a=1, b=2, c=3))
 
   # Key or value unspecified
   expect_error(m$set("a"))
@@ -195,8 +184,32 @@ test_that("Vectorized mset and mget are all-or-nothing", {
   expect_true(length(m$as_list()) == 0)
   expect_identical(m$get("a"), key_missing())
 
+  # Same for mset()
   expect_error(m$mset(a=1, b=stop("oops")))
   expect_identical(m$size(), 0L)
   expect_true(length(m$as_list()) == 0)
   expect_identical(m$get("a"), key_missing())
+
+  # mset(): one bad key stops the entire thing from happening.
+  expect_error(m$mset(a=1, 2, c=3))
+  expect_identical(m$size(), 0L)
+  expect_true(length(m$as_list()) == 0)
+  expect_identical(m$get("a"), key_missing())
+
+
+  # get(): one bad key stops all from being removed.
+  m$mset(a=1, b=2, c=3)
+  expect_error(m$mget(c("a", NA, "c")))
+
+  # remove(): one bad key stops all from being removed.
+  expect_error(m$remove(c("a", NA, "c")))
+  expect_identical(m$size(), 3L)
+  expect_mapequal(m$as_list(), list(a=1, b=2, c=3))
+  expect_identical(m$get("a"), 1)
+
+  # exists(): one bad key stops all from being removed.
+  expect_error(m$exists(c("a", "", "c")))
+  expect_identical(m$size(), 3L)
+  expect_mapequal(m$as_list(), list(a=1, b=2, c=3))
+  expect_identical(m$get("a"), 1)
 })
