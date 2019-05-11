@@ -147,25 +147,56 @@ test_that("Malformed keys", {
   expect_error(m$get(numeric(0)))
   expect_error(m$get(NULL))
 
-  expect_mapequal(m$mget(NULL), list()) # Fix this test. Should we allow NULL?
+  expect_equal(m$mget(NULL), list())
   expect_error(m$mget(c(1, 2)))
   expect_error(m$mget(c("A", "")))
   expect_error(m$mget(c("A", NA)))
 
+  expect_error(m$exists(1))
+  expect_error(m$exists(TRUE))
+  expect_error(m$exists(NA_character_))
+  expect_error(m$exists(NA_integer_))
+  expect_error(m$exists(""))
+  expect_error(m$exists(character(0)))
+  expect_error(m$exists(numeric(0)))
+  expect_error(m$exists(NULL))
+
   expect_error(m$remove(NA_character_))
   expect_error(m$remove(NA_integer_))
   expect_error(m$remove(""))
-  expect_error(m$remove(character(0)))
+  # remove() is a bit more lenient than get() because it accepts a vector.
+  m$remove(character(0))
+  m$remove(NULL)
   expect_error(m$remove(numeric(0)))
-  expect_error(m$remove(NULL))
 
-  # When removing multiple, one bad key shouldn't stop others from being removed
+  # Operations with multiple keys -- one bad key stops the entire thing from
+  # happening.
+  expect_error(m$mset(a=1, 2, c=3))
+  expect_true(length(m$as_list()) == 0)
+
+  expect_error(m$mget(c("a", NA, "c")))
+
+  # When removing multiple, one bad key stops all from being removed.
   m$mset(a=1, b=2, c=3)
-
   expect_error(m$remove(c("a", NA, "c")))
-  expect_mapequal(m$as_list(), list(b=2))
+  expect_mapequal(m$as_list(), list(a=1, b=2, c=3))
 
   # Key or value unspecified
-  m$set("a")
-  m$set(value = 123)
+  expect_error(m$set("a"))
+  expect_error(m$set(value = 123))
+})
+
+
+test_that("Vectorized mset and mget are all-or-nothing", {
+  # An error in set() won't leave map in an inconsistent state.
+  m <- fastmap(missing_default = key_missing())
+  expect_error(m$set("a", stop("oops")))
+  expect_identical(m$size(), 0L)
+  expect_true(length(m$as_list()) == 0)
+  expect_identical(m$get("a"), key_missing())
+
+  expect_error(m$mset(a=1, b=stop("oops")))
+  expect_identical(m$size(), 0L)
+  expect_true(length(m$as_list()) == 0)
+  expect_identical(m$get("a"), key_missing())
 })

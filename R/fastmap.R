@@ -101,6 +101,11 @@ fastmap <- function(missing_default = NULL) {
   reset()
 
   set <- function(key, value) {
+    # Force evaluation of value here, so that, if it throws an error, the error
+    # will not happen in the middle of this function and leave things in an
+    # inconsistent state.
+    force(value)
+
     idx <- .Call(C_map_get, key_idx_map, key)
 
     if (idx == -1L) {
@@ -153,6 +158,9 @@ fastmap <- function(missing_default = NULL) {
   }
 
   mget <- function(keys, missing = missing_default) {
+    if (!(is.character(keys) || is.null(keys))) {
+      stop("mget: `keys` must be a character vector or NULL")
+    }
     names(keys) <- keys
     lapply(keys, get, missing)
   }
@@ -185,6 +193,12 @@ fastmap <- function(missing_default = NULL) {
   }
 
   remove <- function(keys) {
+    if (!(is.character(keys) || is.null(keys))) {
+      stop("mget: `keys` must be a character vector or NULL")
+    }
+    if (any(keys == "") || any(is.na(keys))) {
+      stop('mget: `keys` must not be "" or NA')
+    }
     for (key in keys) {
       remove_one(key)
     }
