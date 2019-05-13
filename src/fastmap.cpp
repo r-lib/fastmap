@@ -1,10 +1,14 @@
 #include <R.h>
 #include <Rdefines.h>
-#include <map>
 #include <string>
 
-typedef std::map<std::string, int> si_map;
-
+#if __cplusplus >= 201103L
+  #include<unordered_map>
+  typedef std::unordered_map<std::string, int> si_map;
+#else
+  #include <map>
+  typedef std::map<std::string, int> si_map;
+#endif
 
 extern "C" {
   si_map* map_from_xptr(SEXP map_xptr) {
