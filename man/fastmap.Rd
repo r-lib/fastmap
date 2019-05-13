@@ -28,6 +28,13 @@ One important difference between environments and fastmaps is that
 environments can be serialized and restored in another R session, while
 fastmaps cannot (though this may be added in the future).
 
+Unlike with environments, the keys in a fastmap are always encoded as UTF-8,
+so if you call \code{m$set()} with two different strings that have the same
+Unicode values but have different encodings, the second call will overwrite
+the first value. If you call \code{m$keys()}, it will return UTF-8 encoded
+strings, and similarly, \code{m$as_list()} will return a list with names that
+have UTF-8 encoding.
+
 Fastmap objects have the following methods:
 
 \describe{
