@@ -196,7 +196,12 @@ fastmap <- function(missing_default = NULL) {
     if (!(is.character(keys) || is.null(keys))) {
       stop("mget: `keys` must be a character vector or NULL")
     }
-    vapply(keys, exists_one, FUN.VALUE = TRUE, USE.NAMES = FALSE)
+    if (length(keys) == 1) {
+      # In the common case of only one key, it's faster to avoid vapply.
+      exists_one(keys)
+    } else {
+      vapply(keys, exists_one, FUN.VALUE = TRUE, USE.NAMES = FALSE)
+    }
   }
 
   # Internal function
@@ -229,7 +234,12 @@ fastmap <- function(missing_default = NULL) {
     if (any(keys == "") || any(is.na(keys))) {
       stop('mget: `keys` must not be "" or NA')
     }
-    vapply(keys, remove_one, FUN.VALUE = TRUE, USE.NAMES = FALSE)
+    if (length(keys) == 1) {
+      # In the common case of only one key, it's faster to avoid vapply.
+      remove_one(keys)
+    } else {
+      vapply(keys, remove_one, FUN.VALUE = TRUE, USE.NAMES = FALSE)
+    }
   }
 
   size <- function() {
