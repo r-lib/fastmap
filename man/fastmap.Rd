@@ -59,14 +59,17 @@ Fastmap objects have the following methods:
     from) the map.
   }
   \item{\code{keys()}}{
-    Returns a character vector of all the keys, in unspecified order.
+    Returns a character vector of all the keys, in arbitrary order. Note that
+    the order can vary across platforms and is not guaranteed to be
+    consistent.
   }
   \item{\code{size()}}{
     Returns the number of items in the map.
   }
   \item{\code{as_list()}}{
     Return a named list where the names are the keys from the map, and the
-    values are the values, in unspecified order.
+    values are the values, in arbitrary order. Note that the order can vary
+    across platforms and is not guaranteed to be consistent.
   }
   \item{\code{reset()}}{
     Reset the fastmap object, clearing all items.
