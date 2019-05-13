@@ -78,7 +78,7 @@ m <- fastmap()
 m$get("x", missing = key_missing())
 #> <Key Missing>
 
-# Setting the default missing value
+# Specify the default missing value
 m <- fastmap(missing_default = key_missing())
 m$get("x")
 #> <Key Missing>

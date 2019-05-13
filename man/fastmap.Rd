@@ -87,4 +87,47 @@ Fastmap objects have the following methods:
 # Create the fastmap object
 m <- fastmap()
 
+# Set some key-value pairs
+m$set("x", 100)
+m$set("letters", c("a", "b", "c"))
+m$mset(numbers = c(10, 20, 30), nothing = NULL)
+
+# Get values using keys
+m$get("x")
+m$get("numbers")
+m$mget(c("letters", "numbers"))
+
+# Missing keys return NULL by default, but this can be customized
+m$get("xyz")
+
+# Check for existence of keys
+m$exists("x")
+m$exists("xyz")
+
+# Remove one or more items
+m$remove(c("letters", "x"))
+
+# Return number of items
+m$size()
+
+# Get all keys
+m$keys()
+
+# Return named list that represents all key-value pairs
+str(m$as_list())
+
+# Clear the map
+m$reset()
+
+
+# Specify missing value when get() is called
+m <- fastmap()
+m$get("x", missing = key_missing())
+#> <Key Missing>
+
+# Specify the default missing value
+m <- fastmap(missing_default = key_missing())
+m$get("x")
+#> <Key Missing>
+
 }
