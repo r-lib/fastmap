@@ -5,7 +5,7 @@ fastmap
 
 The usual way of doing this in R is to use environments.. However, this method is problematic when using a large set of keys or randomly-generated keys, because each time you use a key or even check for the existence of a key using `exists()`, that key is interned as a symbol and stored in the R symbol table, which is never garbage-collected. This means that every time you use a new key -- whether it is to store an object or just check whether the key exists in the environment, R leaks a little memory. If you have a relatively small, fixed set of keys, or if your R process is a short-running process, this may not be a problem. But if you have a long-running R process that uses random keys, then the memory leakage may be problematic.
 
-**fastmap** solves this problem by storing the keys as C++ `std::string` objects, and so it does not use the R symbol table at all. The values are stored in a list so that R knows not to garbage-collect them. In C++, fastmap uses a `std::map` to map from the keys to indices in the list of values.
+**fastmap** solves this problem by storing the keys as C++ `std::string` objects, and so it does not use the R symbol table at all. The values are stored in a list so that R knows not to garbage-collect them. In C++, fastmap uses a `std::unordered_map` to map from the keys to indices in the list of values.
 
 ## Installation
 
@@ -87,9 +87,15 @@ m$get("x")
 
 ## Notes
 
+### Serialization
+
 One important difference between using a `fastmap` object vs. an environment-backed map is that a fastmap can't be serialized since it includes an external pointer. That means that it can't be saved in one R session and restored in another. (It may be possible in the future to make this work.)
 
 In a package, if a fastmap object is used, it can't be created and stored at build time. Instead of creating a fastmap object at build time, it should be created each time the package is loaded, in the package's `.onLoad()` function.
+
+### Key encoding
+
+Unlike with environments, the keys in a fastmap are always encoded as UTF-8, so if you call `m$set()` with two different strings that have the same Unicode values but have different encodings, the second call will overwrite the first value. If you call `m$keys()`, it will return UTF-8 encoded strings, and similarly, `m$as_list()` will return a list with names that have UTF-8 encoding.
 
 
 ## Memory leak examples
