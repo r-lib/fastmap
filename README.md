@@ -44,9 +44,9 @@ m$get("xyz")
 #> NULL
 
 # Check for existence of keys
-m$exists("x")
+m$has("x")
 #> [1] TRUE
-m$exists("xyz")
+m$has("xyz")
 #> [1] FALSE
 
 # Remove one or more items
@@ -157,7 +157,7 @@ for (i in 1:8) {
   m <- fastmap()
   for (j in 1:10000) {
     x <- as.character(runif(1))
-    m$exists(x)
+    m$has(x)
     m$set(x, x)
   }
   rm(m, x)

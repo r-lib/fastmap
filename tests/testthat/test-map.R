@@ -9,9 +9,9 @@ test_that("General correctness", {
     m$as_list(),
     list("asdf" = c(1, 2, 3), "foo"= "blah")
   )
-  expect_true(m$exists("asdf"))
-  expect_true(m$exists("foo"))
-  expect_false(m$exists("bar"))
+  expect_true(m$has("asdf"))
+  expect_true(m$has("foo"))
+  expect_false(m$has("bar"))
   expect_identical(m$size(), 2L)
   expect_identical(m$size(), length(get_self(m)$values) - get_self(m)$n_holes)
 
@@ -22,9 +22,9 @@ test_that("General correctness", {
     m$as_list(),
     list("foo"= "blah")
   )
-  expect_false(m$exists("asdf"))
-  expect_true(m$exists("foo"))
-  expect_false(m$exists("bar"))
+  expect_false(m$has("asdf"))
+  expect_true(m$has("foo"))
+  expect_false(m$has("bar"))
   expect_identical(m$size(), 1L)
   expect_identical(m$size(), length(get_self(m)$values) - get_self(m)$n_holes)
   # Removing non-existent key has no effect
@@ -38,9 +38,9 @@ test_that("General correctness", {
     m$as_list(),
     list("asdf" = list("a", "b"), "foo"= "blah")
   )
-  expect_true(m$exists("asdf"))
-  expect_true(m$exists("foo"))
-  expect_false(m$exists("bar"))
+  expect_true(m$has("asdf"))
+  expect_true(m$has("foo"))
+  expect_false(m$has("bar"))
   expect_identical(m$size(), 2L)
   expect_identical(m$size(), length(get_self(m)$values) - get_self(m)$n_holes)
 
@@ -52,16 +52,16 @@ test_that("General correctness", {
     m$as_list(),
     list("asdf" = list("x", "y"), "foo"= "blah")
   )
-  expect_true(m$exists("asdf"))
-  expect_true(m$exists("foo"))
-  expect_false(m$exists("bar"))
+  expect_true(m$has("asdf"))
+  expect_true(m$has("foo"))
+  expect_false(m$has("bar"))
   expect_identical(m$size(), 2L)
   expect_identical(m$size(), length(get_self(m)$values) - get_self(m)$n_holes)
 
   # NULL handling
   m$set("asdf", NULL)
   expect_equal(m$get("asdf"), NULL)
-  expect_true(m$exists("asdf"))
+  expect_true(m$has("asdf"))
   expect_mapequal(
     m$as_list(),
     list("asdf" = NULL, "foo"= "blah")
@@ -98,7 +98,7 @@ test_that("Vectorized operations", {
   )
 
   expect_identical(
-    m$exists(c("e", "a", "x", "a", "y")),
+    m$has(c("e", "a", "x", "a", "y")),
     c(TRUE, TRUE, FALSE, TRUE, FALSE)
   )
 
@@ -169,15 +169,15 @@ test_that("Malformed keys", {
   expect_error(m$mget(c("A", "")))
   expect_error(m$mget(c("A", NA)))
 
-  expect_error(m$exists(1))
-  expect_error(m$exists(TRUE))
-  expect_error(m$exists(NA_character_))
-  expect_error(m$exists(NA_integer_))
-  expect_error(m$exists(""))
-  # exists() is a bit more lenient than get() because it accepts a vector.
-  expect_silent(m$exists(character(0)))
-  expect_silent(m$exists(NULL))
-  expect_error(m$exists(numeric(0)))
+  expect_error(m$has(1))
+  expect_error(m$has(TRUE))
+  expect_error(m$has(NA_character_))
+  expect_error(m$has(NA_integer_))
+  expect_error(m$has(""))
+  # has() is a bit more lenient than get() because it accepts a vector.
+  expect_silent(m$has(character(0)))
+  expect_silent(m$has(NULL))
+  expect_error(m$has(numeric(0)))
 
   expect_error(m$remove(NA_character_))
   expect_error(m$remove(NA_integer_))
@@ -224,8 +224,8 @@ test_that("Vectorized mset and mget are all-or-nothing", {
   expect_mapequal(m$as_list(), list(a=1, b=2, c=3))
   expect_identical(m$get("a"), 1)
 
-  # exists(): one bad key stops all from being removed.
-  expect_error(m$exists(c("a", "", "c")))
+  # has(): one bad key stops all from being removed.
+  expect_error(m$has(c("a", "", "c")))
   expect_identical(m$size(), 3L)
   expect_mapequal(m$as_list(), list(a=1, b=2, c=3))
   expect_identical(m$get("a"), 1)

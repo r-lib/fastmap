@@ -46,7 +46,7 @@ NULL
 #'     the \code{keys} passed in, in the same order. For keys not in the map,
 #'     they will have \code{missing} for their value.
 #'   }
-#'   \item{\code{exists(keys)}}{
+#'   \item{\code{has(keys)}}{
 #'     Given a vector of keys, returns a logical vector reporting whether each
 #'     key is contained in the map.
 #'   }
@@ -96,8 +96,8 @@ NULL
 #' m$get("xyz")
 #'
 #' # Check for existence of keys
-#' m$exists("x")
-#' m$exists("xyz")
+#' m$has("x")
+#' m$has("xyz")
 #'
 #' # Remove one or more items
 #' m$remove(c("letters", "x"))
@@ -240,20 +240,20 @@ fastmap <- function(missing_default = NULL) {
   }
 
   # Internal function
-  exists_one <- function(key) {
+  has_one <- function(key) {
     idx <- .Call(C_map_get, key_idx_map, key)
     return(idx != -1L)
   }
 
-  exists <- function(keys) {
+  has <- function(keys) {
     if (!(is.character(keys) || is.null(keys))) {
       stop("mget: `keys` must be a character vector or NULL")
     }
     if (length(keys) == 1) {
       # In the common case of only one key, it's faster to avoid vapply.
-      exists_one(keys)
+      has_one(keys)
     } else {
-      vapply(keys, exists_one, FUN.VALUE = TRUE, USE.NAMES = FALSE)
+      vapply(keys, has_one, FUN.VALUE = TRUE, USE.NAMES = FALSE)
     }
   }
 
@@ -374,7 +374,7 @@ fastmap <- function(missing_default = NULL) {
     mset = mset,
     get = get,
     mget = mget,
-    exists = exists,
+    has = has,
     remove = remove,
     keys = keys,
     size = size,
