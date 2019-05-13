@@ -3,6 +3,7 @@
 #include <string>
 
 #if __cplusplus >= 201103L
+  // std::unordered_map is faster than std::map, but requires C++11.
   #include<unordered_map>
   typedef std::unordered_map<std::string, int> si_map;
 #else
