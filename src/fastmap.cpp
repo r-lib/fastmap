@@ -11,6 +11,22 @@
   typedef std::map<std::string, int> si_map;
 #endif
 
+
+// Note that this returns a const char* which points to the CHARSXP's
+// memory, so its lifetime must not exceed the CHARSXP's lifetime.
+std::string key_from_sexp(SEXP key_r) {
+  if (TYPEOF(key_r) != STRSXP || length(key_r) != 1) {
+    error("key must be a one-element character vector");
+  }
+  SEXP key_c = PROTECT(STRING_ELT(key_r, 0));
+  if (key_c == NA_STRING || Rf_StringBlank(key_c)) {
+    error("key must be not be \"\" or NA");
+  }
+  UNPROTECT(1);
+  return std::string(Rf_translateCharUTF8(key_c));
+}
+
+
 extern "C" {
   si_map* map_from_xptr(SEXP map_xptr) {
     if (TYPEOF(map_xptr) != EXTPTRSXP) {
@@ -30,21 +46,6 @@ extern "C" {
     R_ClearExternalPtr(map_xptr);
   }
 
-  // Note that this returns a const char* which points to the CHARSXP's
-  // memory, so its lifetime must not exceed the CHARSXP's lifetime.
-  const char* key_from_sexp(SEXP key_r) {
-    if (TYPEOF(key_r) != STRSXP || length(key_r) != 1) {
-      error("key must be a one-element character vector");
-    }
-    SEXP key_c = PROTECT(STRING_ELT(key_r, 0));
-    if (key_c == NA_STRING || Rf_StringBlank(key_c)) {
-      error("key must be not be \"\" or NA");
-    }
-    UNPROTECT(1);
-    return CHAR(key_c);
-  }
-
-
   SEXP C_map_create() {
     si_map* map = new si_map;
     SEXP map_xptr = PROTECT(R_MakeExternalPtr(map, R_NilValue, R_NilValue));
@@ -55,7 +56,7 @@ extern "C" {
 
 
   SEXP C_map_set(SEXP map_xptr, SEXP key_r, SEXP idx_r) {
-    const char* key = key_from_sexp(key_r);
+    std::string key = key_from_sexp(key_r);
 
     if (TYPEOF(idx_r) != INTSXP || length(idx_r) != 1) {
       error("idx must be a one-element integer vector");
@@ -71,7 +72,7 @@ extern "C" {
 
 
   SEXP C_map_get(SEXP map_xptr, SEXP key_r) {
-    const char* key = key_from_sexp(key_r);
+    std::string key = key_from_sexp(key_r);
 
     si_map* map = map_from_xptr(map_xptr);
 
@@ -85,7 +86,7 @@ extern "C" {
 
 
   SEXP C_map_remove(SEXP map_xptr, SEXP key_r) {
-    const char* key = key_from_sexp(key_r);
+    std::string key = key_from_sexp(key_r);
 
     si_map* map = map_from_xptr(map_xptr);
 
@@ -105,7 +106,7 @@ extern "C" {
 
     int i = 0;
     for(si_map::const_iterator it = map->begin(); it != map->end(); ++it, ++i) {
-      SET_STRING_ELT(keys, i, Rf_mkChar(it->first.c_str()));
+      SET_STRING_ELT(keys, i, Rf_mkCharCE(it->first.c_str(), CE_UTF8));
     }
 
     UNPROTECT(1);
@@ -120,7 +121,7 @@ extern "C" {
     int* idxs_ = INTEGER(idxs);
     int i = 0;
     for(si_map::const_iterator it = map->begin(); it != map->end(); ++it, ++i) {
-      SET_STRING_ELT(keys, i, Rf_mkChar(it->first.c_str()));
+      SET_STRING_ELT(keys, i, Rf_mkCharCE(it->first.c_str(), CE_UTF8));
       idxs_[i] = it->second;
     }
 
