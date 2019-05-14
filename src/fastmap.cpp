@@ -28,6 +28,17 @@ std::string key_from_sexp(SEXP key_r) {
 
 
 extern "C" {
+
+  bool is_ascii(const char *str) {
+    while (*str) {
+      if ((unsigned int)*str > 0x7F) {
+        return false;
+      }
+      str++;
+    }
+    return true;
+  }
+
   si_map* map_from_xptr(SEXP map_xptr) {
     if (TYPEOF(map_xptr) != EXTPTRSXP) {
       error("map_xptr must be an external pointer.");
@@ -131,6 +142,47 @@ extern "C" {
     return idxs;
   }
 
+  // Convert an R character vector to UTF-8. This is necessary because iconv
+  // doesn't really work for vectors where the items have mixed encoding.
+  SEXP C_char_vec_to_utf8(SEXP str) {
+    if (TYPEOF(str) != STRSXP) {
+      error("str must be a character vector");
+    }
+
+    // Our default assumption is that all the keys are UTF-8 (or ASCII), in
+    // which case we do _not_ need to re-encode the keys and copy them to a
+    // new vector.
+    bool need_reencode = false;
+    // Fast path for the common case: check if all the strings are UTF-8. If
+    // yes, just return str. If no, we need to copy and re-encode each element
+    // to a new vector.
+    int n_str = Rf_length(str);
+    SEXP tmp;
+    for (int i=0; i<n_str; i++) {
+      tmp = STRING_ELT(str, i);
+
+      if (!is_ascii(CHAR(tmp)) && Rf_getCharCE(tmp) != CE_UTF8) {
+        need_reencode = true;
+        break;
+      }
+    }
+
+    // No need to re-encode. Just return str.
+    if (!need_reencode) {
+      return str;
+    }
+
+    // If we got here, we need to copy and re-encode.
+    SEXP out = PROTECT(Rf_allocVector(STRSXP, n_str));
+
+    for (int i=0; i<n_str; i++) {
+      tmp = STRING_ELT(str, i);
+      SET_STRING_ELT(out, i, Rf_mkCharCE(Rf_translateCharUTF8(tmp), CE_UTF8));
+    }
+
+    UNPROTECT(1);
+    return out;
+  }
 
 
 } // extern "C"

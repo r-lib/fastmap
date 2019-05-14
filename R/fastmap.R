@@ -235,8 +235,13 @@ fastmap <- function(missing_default = NULL) {
     if (!(is.character(keys) || is.null(keys))) {
       stop("mget: `keys` must be a character vector or NULL")
     }
-    names(keys) <- keys
-    lapply(keys, get, missing)
+
+    # Make sure keys are encoded in UTF-8. Need this C function because iconv
+    # doesn't work right for vectors with mixed encodings.
+    keys <- .Call(C_char_vec_to_utf8, keys)
+    res <- lapply(keys, get, missing)
+    names(res) <- keys
+    res
   }
 
   # Internal function
