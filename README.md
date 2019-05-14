@@ -195,4 +195,4 @@ It does not leak memory, and it does not slow down if you run it repeatedly. Aft
 
 The simple tests above simply check for the existence of keys, but with setting values, the results are similar.
 
-Note that the environment operations are themselves slightly faster than the fastmap operations, but the penalty is in slower garbage collection. Also keep in mind that these tests are very artificial and use tens of thousands of random keys; if your application does not do this, then fastmap may have no practical benefit. In general, these operations are so fast that performance bottlenecks almost always lie elsewhere.
+Note that the environment operations are themselves slightly faster than the fastmap operations, but the penalty is in slower garbage collection when many keys have been used. Also keep in mind that these tests are very artificial and use tens of thousands of random keys; if your application does not do this, then fastmap may have no practical benefit. In general, these operations are so fast that performance bottlenecks almost always lie elsewhere.
