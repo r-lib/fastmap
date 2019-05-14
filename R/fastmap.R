@@ -14,10 +14,6 @@ NULL
 #'
 #' Fastmap objects do not use the symbol table and do not leak memory.
 #'
-#' One important difference between environments and fastmaps is that
-#' environments can be serialized and restored in another R session, while
-#' fastmaps cannot (though this may be added in the future).
-#'
 #' Unlike with environments, the keys in a fastmap are always encoded as UTF-8,
 #' so if you call \code{$set()} with two different strings that have the same
 #' Unicode values but have different encodings, the second call will overwrite
@@ -151,10 +147,16 @@ fastmap <- function(missing_default = NULL) {
 
   # Number of items currently stored in the fastmap object.
   n <- NULL
-  # Mapping from key (a string) to index into the list that stores the values
-  # (which can be any R object).
+  # External pointer to the C++ object that maps from key (a string) to index
+  # into the list that stores the values (which can be any R object).
   key_idx_map <- NULL
-  # The backing store for the R objects.
+  # A vector containing keys, where the keys are in the corresponding position
+  # to the values in the values list. This is only used to repopulate the map
+  # after the fastmap has been serialized and deserialized. It contains the same
+  # information as key_idx_map, but, since it is a normal R object, it can be
+  # saved and restored without any extra effort.
+  keys_ <- NULL
+  # Backing store for the R objects.
   values <- NULL
   # Indices in the list which are less than n and not currently occupied. These
   # occur when objects are removed from the map. When a hole is filled, the
@@ -170,11 +172,12 @@ fastmap <- function(missing_default = NULL) {
   # ===================================
 
   reset <- function() {
-    n <<- 0L
+    n           <<- 0L
     key_idx_map <<- .Call(C_map_create)
-    values <<- vector(mode = "list", INITIAL_SIZE)
-    holes <<- seq_len(INITIAL_SIZE)
-    n_holes <<- INITIAL_SIZE
+    keys_       <<- rep(NA_character_, INITIAL_SIZE)
+    values      <<- vector(mode = "list", INITIAL_SIZE)
+    holes       <<- seq_len(INITIAL_SIZE)
+    n_holes     <<- INITIAL_SIZE
     invisible(NULL)
   }
   reset()
@@ -184,6 +187,8 @@ fastmap <- function(missing_default = NULL) {
     # will not happen in the middle of this function and leave things in an
     # inconsistent state.
     force(value)
+
+    ensure_restore_map()
 
     idx <- .Call(C_map_get, key_idx_map, key)
 
@@ -214,6 +219,8 @@ fastmap <- function(missing_default = NULL) {
     } else {
       values[[idx]] <<- value
     }
+    # Store the key, as UTF-8
+    keys_[idx] <<- .Call(C_char_vec_to_utf8, key)
 
     invisible(value)
   }
@@ -232,6 +239,7 @@ fastmap <- function(missing_default = NULL) {
   }
 
   get <- function(key, missing = missing_default) {
+    ensure_restore_map()
     idx <- .Call(C_map_get, key_idx_map, key)
     if (idx == -1L) {
       return(missing)
@@ -258,6 +266,7 @@ fastmap <- function(missing_default = NULL) {
 
   # Internal function
   has_one <- function(key) {
+    ensure_restore_map()
     idx <- .Call(C_map_get, key_idx_map, key)
     return(idx != -1L)
   }
@@ -276,12 +285,14 @@ fastmap <- function(missing_default = NULL) {
 
   # Internal function
   remove_one <- function(key) {
+    ensure_restore_map()
     idx <- .Call(C_map_remove, key_idx_map, key)
     if (idx == -1L) {
       return(FALSE)
     }
 
     values[idx] <<- list(NULL)
+    keys_[idx] <<- NA_character_
     n <<- n - 1L
 
     n_holes <<- n_holes + 1L
@@ -317,10 +328,12 @@ fastmap <- function(missing_default = NULL) {
   }
 
   keys <- function() {
+    ensure_restore_map()
     .Call(C_map_keys, key_idx_map)
   }
 
   as_list <- function() {
+    ensure_restore_map()
     keys_idxs <- .Call(C_map_keys_idxs, key_idx_map)
     result <- values[keys_idxs]
     names(result) <- names(keys_idxs)
@@ -336,6 +349,7 @@ fastmap <- function(missing_default = NULL) {
     # Increase size of values list by assigning NULL past the end. On R 3.4 and
     # up, this will grow it in place.
     values[new_values_length] <<- list(NULL)
+    keys_[new_values_length] <<- NA_character_
 
     # When grow() is called, `holes` is all NAs, but it's not as long as values.
     # Grow it (possibly in place, depending on R version) to new_values_length,
@@ -378,11 +392,31 @@ fastmap <- function(missing_default = NULL) {
     }
 
     values <<- values[-holes]
+    keys_ <<- keys_[-holes]
     holes <<- integer()
     n_holes <<- 0L
     n <<- length(values)
 
     invisible(self)
+  }
+
+  # Internal function. This is useful after a fastmap is deserialized. When that
+  # happens, the key_idx_map xptr will be NULL, and it needs to be repopulated.
+  # Every external-facing method that makes use of key_idx_map should call this
+  # before doing any operations on it.
+  ensure_restore_map <- function() {
+    # If the key_idx_map pointer is not NULL, just return.
+    if (!.Call(C_xptr_is_null, key_idx_map)) {
+      return(invisible())
+    }
+
+    # Repopulate key_idx_map.
+    key_idx_map <<- .Call(C_map_create)
+    holes <- holes[seq_len(n_holes)]
+    idxs <- seq_along(keys_)[-holes]
+    for (idx in idxs) {
+      .Call(C_map_set, key_idx_map, keys_[idx], idx)
+    }
   }
 
   list(

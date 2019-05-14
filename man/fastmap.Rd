@@ -24,10 +24,6 @@ keys are used, this can cause a non-trivial amount of memory leakage.
 
 Fastmap objects do not use the symbol table and do not leak memory.
 
-One important difference between environments and fastmaps is that
-environments can be serialized and restored in another R session, while
-fastmaps cannot (though this may be added in the future).
-
 Unlike with environments, the keys in a fastmap are always encoded as UTF-8,
 so if you call \code{$set()} with two different strings that have the same
 Unicode values but have different encodings, the second call will overwrite

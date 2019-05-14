@@ -89,9 +89,9 @@ m$get("x")
 
 ### Serialization
 
-One important difference between using a `fastmap` object vs. an environment-backed map is that a fastmap can't be serialized since it includes an external pointer. That means that it can't be saved in one R session and restored in another. (It may be possible in the future to make this work.)
+A fastmap object can be serialized (or saved) in one R session and deserialized (or loaded) in another. For performance, the data structure that tracks the mapping between keys and values is implemented in C++, and this data structure will not be serialized, but fastmap also keeps a copy of the same information in an ordinary R vector, which will be serialized. After a fastmap object is deserialized, the C++ data structure will not exist, but the first time any method on the fastmap is called, the C++ data structure will be rebuilt using information from the R vector.
 
-In a package, if a fastmap object is used, it can't be created and stored at build time. Instead of creating a fastmap object at build time, it should be created each time the package is loaded, in the package's `.onLoad()` function.
+The vector is much slower for lookups, and so it is used only for restoring the C++ data structure after a fastmap object is deserialized or loaded.
 
 ### Key encoding
 

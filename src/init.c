@@ -12,6 +12,7 @@ extern SEXP C_map_remove(SEXP, SEXP);
 extern SEXP C_map_keys(SEXP);
 extern SEXP C_map_keys_idxs(SEXP);
 extern SEXP C_char_vec_to_utf8(SEXP);
+extern SEXP C_xptr_is_null(SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
   {"C_map_create",                  (DL_FUNC) &C_map_create,           0},
@@ -21,6 +22,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_map_keys",                    (DL_FUNC) &C_map_keys,             1},
   {"C_map_keys_idxs",               (DL_FUNC) &C_map_keys_idxs,        1},
   {"C_char_vec_to_utf8",            (DL_FUNC) &C_char_vec_to_utf8,     1},
+  {"C_xptr_is_null",                (DL_FUNC) &C_xptr_is_null,         1},
   {NULL, NULL, 0}
 };
 

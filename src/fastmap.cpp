@@ -57,6 +57,14 @@ extern "C" {
     R_ClearExternalPtr(map_xptr);
   }
 
+  SEXP C_xptr_is_null(SEXP map_xptr) {
+    if (TYPEOF(map_xptr) != EXTPTRSXP) {
+      error("map_xptr must be an external pointer.");
+    }
+    return Rf_ScalarLogical(R_ExternalPtrAddr(map_xptr) == NULL);
+  }
+
+
   SEXP C_map_create() {
     si_map* map = new si_map;
     SEXP map_xptr = PROTECT(R_MakeExternalPtr(map, R_NilValue, R_NilValue));
