@@ -155,6 +155,15 @@ test_that("Malformed keys", {
   expect_error(m$set(numeric(0), 123))
   expect_error(m$set(NULL, 123))
 
+  args <- list(1,2,3)
+  names(args) <- c("a", NA_character_, "c")
+  m$mset(.list = args)
+  # Make sure no values got set
+  expect_true(length(m$as_list()) == 0)
+  expect_identical(m$keys(), character(0))
+  expect_identical(m$size(), 0)
+  expect_identical(m$get("a"), NULL)
+
   expect_error(m$get(1))
   expect_error(m$get(TRUE))
   expect_error(m$get(NA_character_))

@@ -228,7 +228,7 @@ fastmap <- function(missing_default = NULL) {
   mset <- function(..., .list = NULL) {
     objs <- c(list(...), .list)
     keys <- names(objs)
-    if (is.null(keys) || any(keys == "")) {
+    if (is.null(keys) || any(is.na(keys)) || any(keys == "")) {
       stop("mset: all values must be named.")
     }
     for (i in seq_along(objs)) {
