@@ -202,7 +202,7 @@ test_that("Malformed keys", {
 })
 
 
-test_that("Vectorized mset and mget are all-or-nothing", {
+test_that("Vectorized operations are all-or-nothing", {
   # An error in set() won't leave map in an inconsistent state.
   m <- fastmap(missing_default = key_missing())
   expect_error(m$set("a", stop("oops")))
