@@ -106,6 +106,7 @@ m$get("xyz")
 
 # Check for existence of keys
 m$has("x")
+m$has("nothing")
 m$has("xyz")
 
 # Remove one or more items

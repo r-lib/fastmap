@@ -51,6 +51,8 @@ m$get("xyz")
 # Check for existence of keys
 m$has("x")
 #> [1] TRUE
+m$has("nothing")
+#> [1] TRUE
 m$has("xyz")
 #> [1] FALSE
 
