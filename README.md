@@ -10,7 +10,7 @@ The usual way of doing this in R is to use environments.. However, this method i
 ## Installation
 
 ```R
-devtools::install_github("wch/fastmap")
+devtools::install_github("r-lib/fastmap")
 ```
 
 
