@@ -74,7 +74,7 @@ test_that("reset", {
   m$set("a", 1)
   m$set("b", 2)
   m$reset()
-  expect_equal(m$as_list(), list(a=1)[0])
+  expect_equal(m$as_list(), setNames(list(), character()))
   expect_equal(m$size(), 0)
 })
 
@@ -173,7 +173,7 @@ test_that("Malformed keys", {
   expect_error(m$get(numeric(0)))
   expect_error(m$get(NULL))
 
-  expect_identical(m$mget(NULL), list(a=1)[0]) # Empty named list
+  expect_identical(m$mget(NULL), setNames(list(), character())) # Empty named list
   expect_error(m$mget(c(1, 2)))
   expect_error(m$mget(c("A", "")))
   expect_error(m$mget(c("A", NA)))

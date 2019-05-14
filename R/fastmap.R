@@ -251,7 +251,7 @@ fastmap <- function(missing_default = NULL) {
 
   mget <- function(keys, missing = missing_default) {
     if (is.null(keys)) {
-      return(list(a=1)[0]) # Special case: return empty named list
+      return(setNames(list(), character())) # Special case: return empty named list
     }
     if (!is.character(keys)) {
       stop("mget: `keys` must be a character vector or NULL")
