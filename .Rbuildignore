@@ -2,3 +2,6 @@
 ^\.Rproj\.user$
 \.sublime-project$
 \.sublime-workspace$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
