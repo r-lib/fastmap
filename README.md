@@ -1,6 +1,10 @@
 fastmap
 =======
 
+<!-- badges: start -->
+[![Travis build status](https://travis-ci.org/r-lib/fastmap.svg?branch=master)](https://travis-ci.org/r-lib/fastmap)
+<!-- badges: end -->
+
 **fastmap** is a package that implements _maps_ -- that is, key-value stores -- in R.
 
 The usual way of doing this in R is to use environments. However, this method is problematic when using a large set of keys or randomly-generated keys, because each time you use a key or even check for the existence of a key using `exists()`, that key is interned as a symbol and stored in the R symbol table, which is never garbage-collected. This means that every time you use a new key -- whether it is to store an object or just check whether the key exists in the environment, R leaks a little memory. If you have a relatively small, fixed set of keys, or if your R process is a short-running process, this may not be a problem. But if, for example, you have a long-running R process that uses random keys, then the memory leakage can cause a noticeable increase in memory usage. Also, when R's symbol table is large, garbage collection events, which occur regularly, take more time, reducing R's performance in general. (See the _Memory leak examples_ section of this document for more information.)
