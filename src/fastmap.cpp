@@ -18,11 +18,10 @@ std::string key_from_sexp(SEXP key_r) {
   if (TYPEOF(key_r) != STRSXP || length(key_r) != 1) {
     error("key must be a one-element character vector");
   }
-  SEXP key_c = PROTECT(STRING_ELT(key_r, 0));
+  SEXP key_c = STRING_ELT(key_r, 0);
   if (key_c == NA_STRING || Rf_StringBlank(key_c)) {
     error("key must be not be \"\" or NA");
   }
-  UNPROTECT(1);
   return std::string(Rf_translateCharUTF8(key_c));
 }
 
