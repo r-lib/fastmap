@@ -164,7 +164,7 @@ test_that("Malformed keys", {
   expect_error(m$get(numeric(0)))
   expect_error(m$get(NULL))
 
-  expect_equal(m$mget(NULL), list())
+  expect_identical(m$mget(NULL), list(a=1)[0]) # Empty named list
   expect_error(m$mget(c(1, 2)))
   expect_error(m$mget(c("A", "")))
   expect_error(m$mget(c("A", NA)))
