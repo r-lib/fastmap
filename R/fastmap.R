@@ -166,7 +166,6 @@ fastmap <- function(missing_default = NULL) {
   # the entire object.
   holes <- NULL
   n_holes <- NULL
-  self <- environment()
 
   # ===================================
   # Methods
@@ -367,7 +366,7 @@ fastmap <- function(missing_default = NULL) {
   # Internal function
   shrink <- function() {
     if (n_holes == 0L)
-      return(invisible(self))
+      return(invisible())
 
     keys_idxs <- .Call(C_map_keys_idxs, key_idx_map)
 
@@ -397,8 +396,6 @@ fastmap <- function(missing_default = NULL) {
     holes <<- integer()
     n_holes <<- 0L
     n <<- length(values)
-
-    invisible(self)
   }
 
   # Internal function. This is useful after a fastmap is deserialized. When that
