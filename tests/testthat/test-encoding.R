@@ -1,4 +1,7 @@
-context("encoding")
+# Note: for manual testing on Mac, the following can be used to set a multi-byte
+# but non-UTF-8 locale:
+# Sys.setlocale("LC_ALL", "ja_JP.SJIS")
+
 
 test_that("Non-ASCII keys are represented as UTF-8", {
   m <- fastmap()
