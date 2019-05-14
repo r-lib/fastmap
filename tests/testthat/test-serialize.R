@@ -56,7 +56,6 @@ test_that("Serializing and unserializing stress test", {
   }
 
   m1 <- unserialize(serialize(m, NULL))
-  m1$restore()
   expect_mapequal(m$as_list(), m1$as_list())
   expect_identical(m$size(), m1$size())
   expect_setequal(m$keys(), m1$keys())
