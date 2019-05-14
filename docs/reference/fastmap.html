@@ -193,7 +193,7 @@ are fetched.</p>
 <span class='co'># Missing keys return NULL by default, but this can be customized</span>
 <span class='no'>m</span>$<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/get'>get</a></span>(<span class='st'>"xyz"</span>)</div><div class='output co'>#&gt; NULL</div><div class='input'>
 <span class='co'># Check for existence of keys</span>
-<span class='no'>m</span>$<span class='fu'>has</span>(<span class='st'>"x"</span>)</div><div class='output co'>#&gt; [1] TRUE</div><div class='input'><span class='no'>m</span>$<span class='fu'>has</span>(<span class='st'>"xyz"</span>)</div><div class='output co'>#&gt; [1] FALSE</div><div class='input'>
+<span class='no'>m</span>$<span class='fu'>has</span>(<span class='st'>"x"</span>)</div><div class='output co'>#&gt; [1] TRUE</div><div class='input'><span class='no'>m</span>$<span class='fu'>has</span>(<span class='st'>"nothing"</span>)</div><div class='output co'>#&gt; [1] TRUE</div><div class='input'><span class='no'>m</span>$<span class='fu'>has</span>(<span class='st'>"xyz"</span>)</div><div class='output co'>#&gt; [1] FALSE</div><div class='input'>
 <span class='co'># Remove one or more items</span>
 <span class='no'>m</span>$<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/rm'>remove</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"letters"</span>, <span class='st'>"x"</span>))
 
