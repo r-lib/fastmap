@@ -306,9 +306,9 @@ fastmap <- function(missing_default = NULL) {
     }
     if (length(keys) == 1) {
       # In the common case of only one key, it's faster to avoid vapply.
-      remove_one(keys)
+      invisible(remove_one(keys))
     } else {
-      vapply(keys, remove_one, FUN.VALUE = TRUE, USE.NAMES = FALSE)
+      invisible(vapply(keys, remove_one, FUN.VALUE = TRUE, USE.NAMES = FALSE))
     }
   }
 
