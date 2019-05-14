@@ -3,7 +3,7 @@
 \name{key_missing}
 \alias{key_missing}
 \alias{is.key_missing}
-\title{A Key Missing object}
+\title{A missing key object}
 \usage{
 key_missing()
 

@@ -29,11 +29,19 @@ environments can be serialized and restored in another R session, while
 fastmaps cannot (though this may be added in the future).
 
 Unlike with environments, the keys in a fastmap are always encoded as UTF-8,
-so if you call \code{m$set()} with two different strings that have the same
+so if you call \code{$set()} with two different strings that have the same
 Unicode values but have different encodings, the second call will overwrite
-the first value. If you call \code{m$keys()}, it will return UTF-8 encoded
-strings, and similarly, \code{m$as_list()} will return a list with names that
+the first value. If you call \code{$keys()}, it will return UTF-8 encoded
+strings, and similarly, \code{$as_list()} will return a list with names that
 have UTF-8 encoding.
+
+Note that if you call \code{$mset()} with a named argument, where the name is
+non-ASCII, R will convert the name to the native encoding before fastmap has
+the chance to convert them to UTF-8, and the keys may get mangled in the
+process. However, if you use \code{$mset(.list = x)}, then R will not convert
+the keys to the native encoding, and the keys will be correctly converted to
+UTF-8. With \code{$mget()}, the keys will be converted to UTF-8 before they
+are fetched.
 
 Fastmap objects have the following methods:
 
@@ -56,7 +64,7 @@ Fastmap objects have the following methods:
     the \code{keys} passed in, in the same order. For keys not in the map,
     they will have \code{missing} for their value.
   }
-  \item{\code{exists(keys)}}{
+  \item{\code{has(keys)}}{
     Given a vector of keys, returns a logical vector reporting whether each
     key is contained in the map.
   }
@@ -101,8 +109,8 @@ m$mget(c("letters", "numbers"))
 m$get("xyz")
 
 # Check for existence of keys
-m$exists("x")
-m$exists("xyz")
+m$has("x")
+m$has("xyz")
 
 # Remove one or more items
 m$remove(c("letters", "x"))
