@@ -5,16 +5,16 @@
 #if __cplusplus >= 201103L
   // std::unordered_map is faster than std::map, but requires C++11.
   #include<unordered_map>
-  typedef std::unordered_map<std::string, int> si_map;
+  typedef std::unordered_map<const char*, int> si_map;
 #else
   #include <map>
-  typedef std::map<std::string, int> si_map;
+  typedef std::map<const char*, int> si_map;
 #endif
 
 
 // Note that this returns a const char* which points to the CHARSXP's
 // memory, so its lifetime must not exceed the CHARSXP's lifetime.
-std::string key_from_sexp(SEXP key_r) {
+const char* key_p_from_sexp(SEXP key_r) {
   if (TYPEOF(key_r) != STRSXP || length(key_r) != 1) {
     error("key must be a one-element character vector");
   }
@@ -22,7 +22,10 @@ std::string key_from_sexp(SEXP key_r) {
   if (key_c == NA_STRING || Rf_StringBlank(key_c)) {
     error("key must be not be \"\" or NA");
   }
-  return std::string(Rf_translateCharUTF8(key_c));
+  // A CHARSXP
+  key_c = Rf_mkCharCE(Rf_translateCharUTF8(key_c), CE_UTF8);
+
+  return CHAR(key_c);
 }
 
 
@@ -36,6 +39,14 @@ extern "C" {
       str++;
     }
     return true;
+  }
+
+  // Returns true if the encoding of a CHARSXP is UTF-8 or ASCII.
+  bool sexp_is_utf8(SEXP s) {
+    if (TYPEOF(s) != CHARSXP) {
+      error("s must be a CHARSXP.");
+    }
+    return is_ascii(CHAR(s)) || Rf_getCharCE(s) == CE_UTF8;
   }
 
   si_map* map_from_xptr(SEXP map_xptr) {
@@ -74,7 +85,7 @@ extern "C" {
 
 
   SEXP C_map_set(SEXP map_xptr, SEXP key_r, SEXP idx_r) {
-    std::string key = key_from_sexp(key_r);
+    const char* key_p = key_p_from_sexp(key_r);
 
     if (TYPEOF(idx_r) != INTSXP || length(idx_r) != 1) {
       error("idx must be a one-element integer vector");
@@ -83,18 +94,18 @@ extern "C" {
     si_map* map = map_from_xptr(map_xptr);
     int idx = INTEGER(idx_r)[0];
 
-    (*map)[key] = idx;
+    (*map)[key_p] = idx;
 
     return R_NilValue;
   }
 
 
   SEXP C_map_get(SEXP map_xptr, SEXP key_r) {
-    std::string key = key_from_sexp(key_r);
+    const char* key_p = key_p_from_sexp(key_r);
 
     si_map* map = map_from_xptr(map_xptr);
 
-    si_map::const_iterator it = map->find(key);
+    si_map::const_iterator it = map->find(key_p);
     if (it == map->end()) {
       return Rf_ScalarInteger(-1);
     } else {
@@ -104,11 +115,11 @@ extern "C" {
 
 
   SEXP C_map_remove(SEXP map_xptr, SEXP key_r) {
-    std::string key = key_from_sexp(key_r);
+    const char* key_p = key_p_from_sexp(key_r);
 
     si_map* map = map_from_xptr(map_xptr);
 
-    si_map::iterator it = map->find(key);
+    si_map::iterator it = map->find(key_p);
     if (it == map->end()) {
       return Rf_ScalarInteger(-1);
     } else {
@@ -124,7 +135,7 @@ extern "C" {
 
     int i = 0;
     for(si_map::const_iterator it = map->begin(); it != map->end(); ++it, ++i) {
-      SET_STRING_ELT(keys, i, Rf_mkCharCE(it->first.c_str(), CE_UTF8));
+      SET_STRING_ELT(keys, i, Rf_mkCharCE(it->first, CE_UTF8));
     }
 
     UNPROTECT(1);
@@ -139,7 +150,7 @@ extern "C" {
     int* idxs_ = INTEGER(idxs);
     int i = 0;
     for(si_map::const_iterator it = map->begin(); it != map->end(); ++it, ++i) {
-      SET_STRING_ELT(keys, i, Rf_mkCharCE(it->first.c_str(), CE_UTF8));
+      SET_STRING_ELT(keys, i, Rf_mkCharCE(it->first, CE_UTF8));
       idxs_[i] = it->second;
     }
 
@@ -164,11 +175,8 @@ extern "C" {
     // yes, just return str. If no, we need to copy and re-encode each element
     // to a new vector.
     int n_str = Rf_length(str);
-    SEXP tmp;
     for (int i=0; i<n_str; i++) {
-      tmp = STRING_ELT(str, i);
-
-      if (!is_ascii(CHAR(tmp)) && Rf_getCharCE(tmp) != CE_UTF8) {
+      if (!sexp_is_utf8(STRING_ELT(str, i))) {
         need_reencode = true;
         break;
       }
@@ -181,7 +189,7 @@ extern "C" {
 
     // If we got here, we need to copy and re-encode.
     SEXP out = PROTECT(Rf_allocVector(STRSXP, n_str));
-
+    SEXP tmp;
     for (int i=0; i<n_str; i++) {
       tmp = STRING_ELT(str, i);
       SET_STRING_ELT(out, i, Rf_mkCharCE(Rf_translateCharUTF8(tmp), CE_UTF8));
@@ -190,6 +198,5 @@ extern "C" {
     UNPROTECT(1);
     return out;
   }
-
 
 } // extern "C"
