@@ -67,6 +67,8 @@
 <div id="fastmap" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#fastmap" class="anchor"></a>fastmap</h1></div>
+<!-- badges: start -->
+
 <p><strong>fastmap</strong> is a package that implements <em>maps</em> – that is, key-value stores – in R.</p>
 <p>The usual way of doing this in R is to use environments. However, this method is problematic when using a large set of keys or randomly-generated keys, because each time you use a key or even check for the existence of a key using <code><a href="https://www.rdocumentation.org/packages/base/topics/exists">exists()</a></code>, that key is interned as a symbol and stored in the R symbol table, which is never garbage-collected. This means that every time you use a new key – whether it is to store an object or just check whether the key exists in the environment, R leaks a little memory. If you have a relatively small, fixed set of keys, or if your R process is a short-running process, this may not be a problem. But if, for example, you have a long-running R process that uses random keys, then the memory leakage can cause a noticeable increase in memory usage. Also, when R’s symbol table is large, garbage collection events, which occur regularly, take more time, reducing R’s performance in general. (See the <em>Memory leak examples</em> section of this document for more information.)</p>
 <p><strong>fastmap</strong> solves this problem by storing the keys as C++ <code>std::string</code> objects, and so it does not use the R symbol table at all. The values are stored in a list so that R knows not to garbage-collect them. In C++, fastmap uses a <code>std::unordered_map</code> to map from the keys to indices in the list of values.</p>
@@ -257,7 +259,14 @@ Memory leaked: 0 bytes</code></pre>
 </ul>
 </div>
 
-  </div>
+  <div class="dev-status">
+<h2>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://travis-ci.org/r-lib/fastmap"><img src="https://travis-ci.org/r-lib/fastmap.svg?branch=master" alt="Travis build status"></a></li>
+<li><a href="https://cran.r-project.org/package=fastmap"><img src="https://www.r-pkg.org/badges/version/fastmap" alt="CRAN status"></a></li>
+</ul>
+</div>
+</div>
 </div>
 
       <footer><div class="copyright">
