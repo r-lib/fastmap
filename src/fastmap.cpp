@@ -15,12 +15,12 @@
 // Note that this returns a const char* which points to the CHARSXP's
 // memory, so its lifetime must not exceed the CHARSXP's lifetime.
 std::string key_from_sexp(SEXP key_r) {
-  if (TYPEOF(key_r) != STRSXP || length(key_r) != 1) {
-    error("key must be a one-element character vector");
+  if (TYPEOF(key_r) != STRSXP || Rf_length(key_r) != 1) {
+    Rf_error("key must be a one-element character vector");
   }
   SEXP key_c = STRING_ELT(key_r, 0);
   if (key_c == NA_STRING || Rf_StringBlank(key_c)) {
-    error("key must be not be \"\" or NA");
+    Rf_error("key must be not be \"\" or NA");
   }
   return std::string(Rf_translateCharUTF8(key_c));
 }
@@ -40,11 +40,11 @@ extern "C" {
 
   si_map* map_from_xptr(SEXP map_xptr) {
     if (TYPEOF(map_xptr) != EXTPTRSXP) {
-      error("map_xptr must be an external pointer.");
+      Rf_error("map_xptr must be an external pointer.");
     }
     si_map* map = (si_map*) R_ExternalPtrAddr(map_xptr);
     if (!map) {
-      error("fastmap: external pointer to string-to-index map is null.");
+      Rf_error("fastmap: external pointer to string-to-index map is null.");
     }
 
     return map;
@@ -58,7 +58,7 @@ extern "C" {
 
   SEXP C_xptr_is_null(SEXP map_xptr) {
     if (TYPEOF(map_xptr) != EXTPTRSXP) {
-      error("map_xptr must be an external pointer.");
+      Rf_error("map_xptr must be an external pointer.");
     }
     return Rf_ScalarLogical(R_ExternalPtrAddr(map_xptr) == NULL);
   }
@@ -76,8 +76,8 @@ extern "C" {
   SEXP C_map_set(SEXP map_xptr, SEXP key_r, SEXP idx_r) {
     std::string key = key_from_sexp(key_r);
 
-    if (TYPEOF(idx_r) != INTSXP || length(idx_r) != 1) {
-      error("idx must be a one-element integer vector");
+    if (TYPEOF(idx_r) != INTSXP || Rf_length(idx_r) != 1) {
+      Rf_error("idx must be a one-element integer vector");
     }
 
     si_map* map = map_from_xptr(map_xptr);
@@ -143,7 +143,7 @@ extern "C" {
       idxs_[i] = it->second;
     }
 
-    setAttrib(idxs, R_NamesSymbol, keys);
+    Rf_setAttrib(idxs, R_NamesSymbol, keys);
 
     UNPROTECT(2);
     return idxs;
@@ -153,7 +153,7 @@ extern "C" {
   // doesn't really work for vectors where the items have mixed encoding.
   SEXP C_char_vec_to_utf8(SEXP str) {
     if (TYPEOF(str) != STRSXP) {
-      error("str must be a character vector");
+      Rf_error("str must be a character vector");
     }
 
     // Our default assumption is that all the keys are UTF-8 (or ASCII), in
