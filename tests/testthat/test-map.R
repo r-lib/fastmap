@@ -239,3 +239,40 @@ test_that("Vectorized operations are all-or-nothing", {
   expect_mapequal(m$as_list(), list(a=1, b=2, c=3))
   expect_identical(m$get("a"), 1)
 })
+
+
+test_that("Stress test, compared to environment", {
+  # Randomly add and remove items, and compare results with an environment.
+  # This should and remove enough items so that grow() and shrink() are called
+  # several times.
+  set.seed(2250)
+
+  iterations <- 5
+  n <- 1e4
+  # Generate keys and values.
+  values <- rnorm(n)
+  keys <- as.character(values)
+
+  e <- new.env(parent = emptyenv())
+  m <- fastmap()
+
+  for (iter in seq_len(iterations)) {
+    # Add a random 3/4 of the keys
+    add_order <- sample.int(n, size = round(3/4 * n))
+    for (i in add_order) {
+      e[[keys[i]]] <- values[i]
+      m$set(keys[i], values[i])
+    }
+
+    # Then remove a random 3/4 of them
+    remove_order <- sample.int(n, size = round(3/4 * n))
+    for (i in remove_order) {
+      if (exists(keys[i], envir = e))
+        rm(list = keys[i], envir = e)
+
+      # No need to check for existence first with fastmap
+      m$remove(keys[i])
+    }
+    expect_mapequal(as.list(e), m$as_list())
+  }
+})

@@ -40,30 +40,3 @@ test_that("Shrinking empty map", {
   get_self(m)$shrink()
   expect_true(length(m$as_list()) == 0)
 })
-
-
-test_that("Stress test", {
-  set.seed(123)
-
-  n <- 1e4
-  # Generate keys and values. Note that all the keys/values have duplicates.
-  values <- rnorm(n)
-  values <- c(values, values)
-  keys <- as.character(values)
-
-  m <- fastmap()
-  # First add them in random order (all are added twice, but that shouldn't hurt)
-  add_order <- sample.int(n)
-  for (i in add_order) {
-    m$set(keys[i], values[i])
-  }
-
-  # Then remove them in random order
-  remove_order <- sample.int(n)
-  for (i in remove_order) {
-    m$remove(keys[i])
-  }
-
-  expect_identical(m$size(), 0L)
-  expect_true(length(m$as_list()) == 0)
-})

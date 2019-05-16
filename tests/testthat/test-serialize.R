@@ -38,12 +38,11 @@ test_that("Serializing and unserializing stress test", {
   set.seed(3524)
 
   n <- 1e4
-  # Generate keys and values. Note that all the keys/values have duplicates.
+  # Generate keys and values.
   values <- rnorm(n)
   keys <- as.character(values)
 
   m <- fastmap()
-  # First add them in random order (all are added twice, but that shouldn't hurt)
   add_order <- sample.int(n)
   for (i in add_order) {
     m$set(keys[i], values[i])
