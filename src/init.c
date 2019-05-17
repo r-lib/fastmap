@@ -13,6 +13,9 @@ extern SEXP C_map_keys(SEXP, SEXP);
 extern SEXP C_map_keys_idxs(SEXP, SEXP);
 extern SEXP C_char_vec_to_utf8(SEXP);
 extern SEXP C_xptr_is_null(SEXP);
+extern SEXP C_make_weakref(SEXP);
+extern SEXP C_get_weakref(SEXP);
+extern SEXP C_is_weakref(SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
   {"C_map_create",                  (DL_FUNC) &C_map_create,           0},
@@ -23,6 +26,9 @@ static const R_CallMethodDef CallEntries[] = {
   {"C_map_keys_idxs",               (DL_FUNC) &C_map_keys_idxs,        2},
   {"C_char_vec_to_utf8",            (DL_FUNC) &C_char_vec_to_utf8,     1},
   {"C_xptr_is_null",                (DL_FUNC) &C_xptr_is_null,         1},
+  {"C_make_weakref",                (DL_FUNC) &C_make_weakref,         1},
+  {"C_get_weakref",                 (DL_FUNC) &C_get_weakref,          1},
+  {"C_is_weakref",                  (DL_FUNC) &C_is_weakref,           1},
   {NULL, NULL, 0}
 };
 

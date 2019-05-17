@@ -2,6 +2,9 @@
 
 S3method(print,key_missing)
 export(fastmap)
+export(get_weakref)
 export(is.key_missing)
+export(is_weakref)
 export(key_missing)
+export(make_weakref)
 useDynLib(fastmap, .registration = TRUE)
