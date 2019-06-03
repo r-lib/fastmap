@@ -98,6 +98,8 @@ m$get("x")
 
 When you call `m$keys()` or `m$as_list()`, the items are returned in an arbitrary order. Keep in mind that there is no guarantee that the order will be the same across platforms, or across different builds of fastmap.
 
+If you want to guarantee a particular order, you can call `m$keys(sorted=TRUE)` or `m$as_list(sorted=TRUE)`. The result will be a locale-independent sorting of the keys by their Unicode code point values. For example, `é` (Unicode code point 233) comes after `z` (122). If you want the keys to be sorted a different way, you will need to sort them yourself.
+
 ### Serialization
 
 A fastmap object can be serialized (or saved) in one R session and deserialized (or loaded) in another. For performance, the data structure that tracks the mapping between keys and values is implemented in C++, and this data structure will not be serialized, but fastmap also keeps a copy of the same information in an ordinary R vector, which will be serialized. After a fastmap object is deserialized, the C++ data structure will not exist, but the first time any method on the fastmap is called, the C++ data structure will be rebuilt using information from the R vector.
@@ -107,6 +109,20 @@ The vector is much slower for lookups, and so it is used only for restoring the 
 ### Key encoding
 
 Unlike with environments, the keys in a fastmap are always encoded as UTF-8, so if you call `m$set()` with two different strings that have the same Unicode values but have different encodings, the second call will overwrite the first value. If you call `m$keys()`, it will return UTF-8 encoded strings, and similarly, `m$mget()` and `m$as_list()` will return lists with names that have UTF-8 encoding.
+
+### Testing for equality
+
+The base R functions `identical()` and `all.equal()` are commonly used to test two objects for equality, but they will not work correctly for fastmap objects. `identical()` will always report `FALSE` for two distinct fastmap objects, even if they have the same contents, while `all.equal()` will always report `TRUE` for two fastmap objects.
+
+To test whether two fastmap objects have the same contents, compare the results of `$as_list(sorted=TRUE)` for both of the objects. For example:
+
+```
+identical(a$as_list(sorted = TRUE), b$as_list(sorted = TRUE))
+# or
+all.equal(a$as_list(sorted = TRUE), b$as_list(sorted = TRUE))
+```
+
+These comparisons are subject to the technical details of how `identical()` and `all.equal()` treat named lists.
 
 
 ## Memory leak examples

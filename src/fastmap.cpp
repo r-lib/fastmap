@@ -1,6 +1,7 @@
 #include <R.h>
 #include <Rdefines.h>
 #include <string>
+#include <vector>
 
 #if __cplusplus >= 201103L
   // tsl::hopscotch_map is faster than std::map, but requires C++11.
@@ -120,33 +121,83 @@ extern "C" {
     }
   }
 
-  SEXP C_map_keys(SEXP map_xptr) {
+  SEXP C_map_keys(SEXP map_xptr, SEXP sorted_r) {
     si_map* map = map_from_xptr(map_xptr);
     SEXP keys = PROTECT(Rf_allocVector(STRSXP, map->size()));
 
-    int i = 0;
-    for(si_map::const_iterator it = map->begin(); it != map->end(); ++it, ++i) {
-      SET_STRING_ELT(keys, i, Rf_mkCharCE(it->first.c_str(), CE_UTF8));
+    bool sorted = LOGICAL(sorted_r)[0];
+
+    if (sorted) {
+      std::vector<std::string> keys_vec;
+      keys_vec.reserve(map->size());
+
+      // Extract all the keys from the map, then sort them.
+      int i = 0;
+      for(si_map::const_iterator it = map->begin(); it != map->end(); ++it, ++i) {
+        keys_vec.push_back(it->first);
+      }
+      std::sort(keys_vec.begin(), keys_vec.end());
+
+      // Put the sorted keys in the character vector.
+      i = 0;
+      for(std::vector<std::string>::const_iterator it = keys_vec.begin();
+          it != keys_vec.end(); ++it,
+          ++i)
+      {
+        SET_STRING_ELT(keys, i, Rf_mkCharCE(it->c_str(), CE_UTF8));
+      }
+
+    } else {
+      int i = 0;
+      for(si_map::const_iterator it = map->begin(); it != map->end(); ++it, ++i) {
+        SET_STRING_ELT(keys, i, Rf_mkCharCE(it->first.c_str(), CE_UTF8));
+      }
     }
 
     UNPROTECT(1);
     return keys;
   }
 
-  SEXP C_map_keys_idxs(SEXP map_xptr) {
+  SEXP C_map_keys_idxs(SEXP map_xptr, SEXP sorted_r) {
     si_map* map = map_from_xptr(map_xptr);
     SEXP keys = PROTECT(Rf_allocVector(STRSXP, map->size()));
     SEXP idxs = PROTECT(Rf_allocVector(INTSXP, map->size()));
-
     int* idxs_ = INTEGER(idxs);
-    int i = 0;
-    for(si_map::const_iterator it = map->begin(); it != map->end(); ++it, ++i) {
-      SET_STRING_ELT(keys, i, Rf_mkCharCE(it->first.c_str(), CE_UTF8));
-      idxs_[i] = it->second;
+
+    bool sorted = LOGICAL(sorted_r)[0];
+
+
+    if (sorted) {
+      std::vector<std::string> keys_vec;
+      keys_vec.reserve(map->size());
+
+      // Extract all the keys from the map, then sort them.
+      int i = 0;
+      for(si_map::const_iterator it = map->begin(); it != map->end(); ++it, ++i) {
+        keys_vec.push_back(it->first);
+      }
+      std::sort(keys_vec.begin(), keys_vec.end());
+
+      // Use the sorted keys to populate `keys`, as well as extract values
+      // from `map` and put them into `idxs_`.
+      i = 0;
+      for(std::vector<std::string>::const_iterator it = keys_vec.begin();
+          it != keys_vec.end(); ++it,
+          ++i)
+      {
+        SET_STRING_ELT(keys, i, Rf_mkCharCE(it->c_str(), CE_UTF8));
+        idxs_[i] = (*map)[*it];
+      }
+
+    } else {
+      int i = 0;
+      for(si_map::const_iterator it = map->begin(); it != map->end(); ++it, ++i) {
+        SET_STRING_ELT(keys, i, Rf_mkCharCE(it->first.c_str(), CE_UTF8));
+        idxs_[i] = it->second;
+      }
     }
 
     Rf_setAttrib(idxs, R_NamesSymbol, keys);
-
     UNPROTECT(2);
     return idxs;
   }

@@ -60,7 +60,7 @@ NULL
 #'     a logical vector reporting whether each item existed in (and was removed
 #'     from) the map.
 #'   }
-#'   \item{\code{keys()}}{
+#'   \item{\code{keys(sorted = FALSE)}}{
 #'     Returns a character vector of all the keys, in arbitrary order. Note that
 #'     the order can vary across platforms and is not guaranteed to be
 #'     consistent.
@@ -68,7 +68,7 @@ NULL
 #'   \item{\code{size()}}{
 #'     Returns the number of items in the map.
 #'   }
-#'   \item{\code{as_list()}}{
+#'   \item{\code{as_list(sorted = FALSE)}}{
 #'     Return a named list where the names are the keys from the map, and the
 #'     values are the values, in arbitrary order. Note that the order can vary
 #'     across platforms and is not guaranteed to be consistent.
@@ -327,14 +327,14 @@ fastmap <- function(missing_default = NULL) {
     n
   }
 
-  keys <- function() {
+  keys <- function(sorted = FALSE) {
     ensure_restore_map()
-    .Call(C_map_keys, key_idx_map)
+    .Call(C_map_keys, key_idx_map, sorted)
   }
 
-  as_list <- function() {
+  as_list <- function(sorted = FALSE) {
     ensure_restore_map()
-    keys_idxs <- .Call(C_map_keys_idxs, key_idx_map)
+    keys_idxs <- .Call(C_map_keys_idxs, key_idx_map, sorted)
     result <- values[keys_idxs]
     names(result) <- names(keys_idxs)
     result
@@ -368,7 +368,7 @@ fastmap <- function(missing_default = NULL) {
     if (n_holes == 0L)
       return(invisible())
 
-    keys_idxs <- .Call(C_map_keys_idxs, key_idx_map)
+    keys_idxs <- .Call(C_map_keys_idxs, key_idx_map, FALSE)
 
     # Suppose values is a length-7 list, n==3, holes==c(4,1,3,NA), n_holes==3
     # Drop any extra values stored in the holes vector.

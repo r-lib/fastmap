@@ -240,6 +240,21 @@ test_that("Vectorized operations are all-or-nothing", {
   expect_identical(m$get("a"), 1)
 })
 
+test_that("Sorting keys", {
+  m <- fastmap()
+  m$mset(c = 3, a = 1, ".d" = 4, b = 2)
+  expect_identical(m$keys(sorted = TRUE), c(".d", "a", "b", "c"))
+  expect_identical(
+    m$as_list(sorted = TRUE),
+    list(".d" = 4, a = 1, b = 2, c = 3)
+  )
+
+  # Sorting is done by Unicode code point, and is locale-independent.
+  m <- fastmap()
+  m$set("é", 1)
+  m$set("z", 2)
+  expect_identical(m$keys(sorted = TRUE), c("z", "é"))
+})
 
 test_that("Stress test, compared to environment", {
   # Randomly add and remove items, and compare results with an environment.
