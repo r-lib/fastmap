@@ -3,9 +3,11 @@
 #include <string>
 
 #if __cplusplus >= 201103L
-  // std::unordered_map is faster than std::map, but requires C++11.
-  #include<unordered_map>
-  typedef std::unordered_map<std::string, int> si_map;
+  // tsl::hopscotch_map is faster than std::map, but requires C++11.
+  // We're using it instead of std::unordered_map, because the ordering of keys
+  // should be stable across platforms (see #8), and because it's faster.
+  #include <tsl/hopscotch_map.h>
+  typedef tsl::hopscotch_map<std::string, int> si_map;
 #else
   #include <map>
   typedef std::map<std::string, int> si_map;
