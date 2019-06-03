@@ -10,7 +10,7 @@ fastmap
 
 The usual way of doing this in R is to use environments. However, this method is problematic when using a large set of keys or randomly-generated keys, because each time you use a key or even check for the existence of a key using `exists()`, that key is interned as a symbol and stored in the R symbol table, which is never garbage-collected. This means that every time you use a new key -- whether it is to store an object or just check whether the key exists in the environment, R leaks a little memory. If you have a relatively small, fixed set of keys, or if your R process is a short-running process, this may not be a problem. But if, for example, you have a long-running R process that uses random keys, then the memory leakage can cause a noticeable increase in memory usage. Also, when R's symbol table is large, garbage collection events, which occur regularly, take more time, reducing R's performance in general. (See the _Memory leak examples_ section of this document for more information.)
 
-**fastmap** solves this problem by storing the keys as C++ `std::string` objects, and so it does not use the R symbol table at all. The values are stored in a list so that R knows not to garbage-collect them. In C++, fastmap uses a `std::unordered_map` to map from the keys to indices in the list of values.
+**fastmap** solves this problem by storing the keys as C++ `std::string` objects, and so it does not use the R symbol table at all. The values are stored in a list so that R knows not to garbage-collect them. In C++, fastmap uses a `tsl::hopscotch_map` (which is similar to `std::unordered_map`) to map from the keys to indices in the list of values.
 
 ## Installation
 
@@ -93,6 +93,10 @@ m$get("x")
 
 
 ## Notes
+
+### Key ordering
+
+When you call `m$keys()` or `m$as_list()`, the items are returned in an arbitrary order. Keep in mind that there is no guarantee that the order will be the same across platforms, or across different builds of fastmap.
 
 ### Serialization
 
