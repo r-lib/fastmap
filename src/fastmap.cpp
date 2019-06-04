@@ -4,11 +4,11 @@
 #include <vector>
 
 #if __cplusplus >= 201103L
-  // tsl::hopscotch_map is faster than std::map, but requires C++11.
+  // tsl::robin_map is faster than std::map, but requires C++11.
   // We're using it instead of std::unordered_map, because the ordering of keys
   // should be stable across platforms (see #8), and because it's faster.
-  #include <tsl/hopscotch_map.h>
-  typedef tsl::hopscotch_map<std::string, int> si_map;
+  #include <tsl/robin_map.h>
+  typedef tsl::robin_map<std::string, int> si_map;
 #else
   #include <map>
   typedef std::map<std::string, int> si_map;

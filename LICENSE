@@ -7,10 +7,10 @@ The fastmap package as a whole is distributed under the MIT license.
 The fastmap package includes the following third-party library, with the
 following license:
 
-- hopscotch_map (https://github.com/Tessil/hopscotch-map): MIT license
+- robin_map (https://github.com/Tessil/robin-map): MIT license
 
 
-Full text of the license for hopscotch_map:
+Full text of the license for robin_map:
 
 MIT License
 
