@@ -21,75 +21,77 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef TSL_HOPSCOTCH_MAP_H
-#define TSL_HOPSCOTCH_MAP_H
+#ifndef TSL_ROBIN_MAP_H
+#define TSL_ROBIN_MAP_H 
 
 
-#include <algorithm>
 #include <cstddef>
 #include <functional>
 #include <initializer_list>
-#include <list>
 #include <memory>
 #include <type_traits>
 #include <utility>
-#include "hopscotch_hash.h"
+#include "robin_hash.h"
 
 
 namespace tsl {
 
+    
 /**
- * Implementation of a hash map using the hopscotch hashing algorithm.
+ * Implementation of a hash map using open-adressing and the robin hood hashing algorithm with backward shift deletion.
  * 
- * The Key and the value T must be either nothrow move-constructible, copy-constuctible or both.
+ * For operations modifying the hash map (insert, erase, rehash, ...), the strong exception guarantee 
+ * is only guaranteed when the expression `std::is_nothrow_swappable<std::pair<Key, T>>::value &&
+ * std::is_nothrow_move_constructible<std::pair<Key, T>>::value` is true, otherwise if an exception
+ * is thrown during the swap or the move, the hash map may end up in a undefined state. Per the standard
+ * a `Key` or `T` with a noexcept copy constructor and no move constructor also satisfies the 
+ * `std::is_nothrow_move_constructible<std::pair<Key, T>>::value` criterion (and will thus guarantee the 
+ * strong exception for the map).
  * 
- * The size of the neighborhood (NeighborhoodSize) must be > 0 and <= 62 if StoreHash is false.
- * When StoreHash is true, 32-bits of the hash will be stored alongside the neighborhood limiting
- * the NeighborhoodSize to <= 30. There is no memory usage difference between 
- * 'NeighborhoodSize 62; StoreHash false' and 'NeighborhoodSize 30; StoreHash true'.
+ * When `StoreHash` is true, 32 bits of the hash are stored alongside the values. It can improve 
+ * the performance during lookups if the `KeyEqual` function takes time (if it engenders a cache-miss for example) 
+ * as we then compare the stored hashes before comparing the keys. When `tsl::rh::power_of_two_growth_policy` is used
+ * as `GrowthPolicy`, it may also speed-up the rehash process as we can avoid to recalculate the hash. 
+ * When it is detected that storing the hash will not incur any memory penality due to alignement (i.e. 
+ * `sizeof(tsl::detail_robin_hash::bucket_entry<ValueType, true>) == 
+ * sizeof(tsl::detail_robin_hash::bucket_entry<ValueType, false>)`) and `tsl::rh::power_of_two_growth_policy` is
+ * used, the hash will be stored even if `StoreHash` is false so that we can speed-up the rehash (but it will
+ * not be used on lookups unless `StoreHash` is true).
  * 
- * Storing the hash may improve performance on insert during the rehash process if the hash takes time
- * to compute. It may also improve read performance if the KeyEqual function takes time (or incurs a cache-miss).
- * If used with simple Hash and KeyEqual it may slow things down.
- * 
- * StoreHash can only be set if the GrowthPolicy is set to tsl::power_of_two_growth_policy.
- * 
- * GrowthPolicy defines how the map grows and consequently how a hash value is mapped to a bucket. 
- * By default the map uses tsl::power_of_two_growth_policy. This policy keeps the number of buckets 
+ * `GrowthPolicy` defines how the map grows and consequently how a hash value is mapped to a bucket. 
+ * By default the map uses `tsl::rh::power_of_two_growth_policy`. This policy keeps the number of buckets 
  * to a power of two and uses a mask to map the hash to a bucket instead of the slow modulo.
- * You may define your own growth policy, check tsl::power_of_two_growth_policy for the interface.
+ * Other growth policies are available and you may define your own growth policy, 
+ * check `tsl::rh::power_of_two_growth_policy` for the interface.
  * 
- * If the destructors of Key or T throw an exception, behaviour of the class is undefined.
+ * If the destructor of `Key` or `T` throws an exception, the behaviour of the class is undefined.
  * 
  * Iterators invalidation:
  *  - clear, operator=, reserve, rehash: always invalidate the iterators.
- *  - insert, emplace, emplace_hint, operator[]: if there is an effective insert, invalidate the iterators 
- *    if a displacement is needed to resolve a collision (which mean that most of the time, 
- *    insert will invalidate the iterators). Or if there is a rehash.
- *  - erase: iterator on the erased element is the only one which become invalid.
+ *  - insert, emplace, emplace_hint, operator[]: if there is an effective insert, invalidate the iterators.
+ *  - erase: always invalidate the iterators.
  */
 template<class Key, 
          class T, 
          class Hash = std::hash<Key>,
          class KeyEqual = std::equal_to<Key>,
          class Allocator = std::allocator<std::pair<Key, T>>,
-         unsigned int NeighborhoodSize = 62,
          bool StoreHash = false,
-         class GrowthPolicy = tsl::hh::power_of_two_growth_policy<2>>
-class hopscotch_map {
-private:    
+         class GrowthPolicy = tsl::rh::power_of_two_growth_policy<2>>
+class robin_map {
+private:
     template<typename U>
-    using has_is_transparent = tsl::detail_hopscotch_hash::has_is_transparent<U>;
+    using has_is_transparent = tsl::detail_robin_hash::has_is_transparent<U>;
     
     class KeySelect {
     public:
         using key_type = Key;
         
-        const key_type& operator()(const std::pair<Key, T>& key_value) const {
+        const key_type& operator()(const std::pair<Key, T>& key_value) const noexcept {
             return key_value.first;
         }
         
-        key_type& operator()(std::pair<Key, T>& key_value) {
+        key_type& operator()(std::pair<Key, T>& key_value) noexcept {
             return key_value.first;
         }
     };  
@@ -98,23 +100,18 @@ private:
     public:
         using value_type = T;
         
-        const value_type& operator()(const std::pair<Key, T>& key_value) const {
+        const value_type& operator()(const std::pair<Key, T>& key_value) const noexcept {
             return key_value.second;
         }
         
-        value_type& operator()(std::pair<Key, T>& key_value) {
+        value_type& operator()(std::pair<Key, T>& key_value) noexcept {
             return key_value.second;
         }
     };
     
-    
-    using overflow_container_type = std::list<std::pair<Key, T>, Allocator>;
-    using ht = detail_hopscotch_hash::hopscotch_hash<std::pair<Key, T>, KeySelect, ValueSelect,
-                                                     Hash, KeyEqual, 
-                                                     Allocator, NeighborhoodSize, 
-                                                     StoreHash, GrowthPolicy,
-                                                     overflow_container_type>;
-    
+    using ht = detail_robin_hash::robin_hash<std::pair<Key, T>, KeySelect, ValueSelect,
+                                             Hash, KeyEqual, Allocator, StoreHash, GrowthPolicy>;  
+                                             
 public:
     using key_type = typename ht::key_type;
     using mapped_type = T;
@@ -132,86 +129,85 @@ public:
     using const_iterator = typename ht::const_iterator;
     
     
-    
+public:
     /*
      * Constructors
      */
-    hopscotch_map() : hopscotch_map(ht::DEFAULT_INIT_BUCKETS_SIZE) {
+    robin_map(): robin_map(ht::DEFAULT_INIT_BUCKETS_SIZE) {
     }
     
-    explicit hopscotch_map(size_type bucket_count, 
-                        const Hash& hash = Hash(),
-                        const KeyEqual& equal = KeyEqual(),
-                        const Allocator& alloc = Allocator()) : 
-                        m_ht(bucket_count, hash, equal, alloc, ht::DEFAULT_MAX_LOAD_FACTOR)
+    explicit robin_map(size_type bucket_count, 
+                       const Hash& hash = Hash(),
+                       const KeyEqual& equal = KeyEqual(),
+                       const Allocator& alloc = Allocator()): 
+                m_ht(bucket_count, hash, equal, alloc, ht::DEFAULT_MAX_LOAD_FACTOR)
     {
     }
     
-    hopscotch_map(size_type bucket_count,
-                  const Allocator& alloc) : hopscotch_map(bucket_count, Hash(), KeyEqual(), alloc)
+    robin_map(size_type bucket_count,
+              const Allocator& alloc): robin_map(bucket_count, Hash(), KeyEqual(), alloc)
     {
     }
     
-    hopscotch_map(size_type bucket_count,
-                  const Hash& hash,
-                  const Allocator& alloc) : hopscotch_map(bucket_count, hash, KeyEqual(), alloc)
+    robin_map(size_type bucket_count,
+              const Hash& hash,
+              const Allocator& alloc): robin_map(bucket_count, hash, KeyEqual(), alloc)
     {
     }
     
-    explicit hopscotch_map(const Allocator& alloc) : hopscotch_map(ht::DEFAULT_INIT_BUCKETS_SIZE, alloc) {
+    explicit robin_map(const Allocator& alloc): robin_map(ht::DEFAULT_INIT_BUCKETS_SIZE, alloc) {
     }
     
     template<class InputIt>
-    hopscotch_map(InputIt first, InputIt last,
-                size_type bucket_count = ht::DEFAULT_INIT_BUCKETS_SIZE,
-                const Hash& hash = Hash(),
-                const KeyEqual& equal = KeyEqual(),
-                const Allocator& alloc = Allocator()) : hopscotch_map(bucket_count, hash, equal, alloc)
+    robin_map(InputIt first, InputIt last,
+              size_type bucket_count = ht::DEFAULT_INIT_BUCKETS_SIZE,
+              const Hash& hash = Hash(),
+              const KeyEqual& equal = KeyEqual(),
+              const Allocator& alloc = Allocator()): robin_map(bucket_count, hash, equal, alloc)
     {
         insert(first, last);
     }
     
     template<class InputIt>
-    hopscotch_map(InputIt first, InputIt last,
-                size_type bucket_count,
-                const Allocator& alloc) : hopscotch_map(first, last, bucket_count, Hash(), KeyEqual(), alloc)
+    robin_map(InputIt first, InputIt last,
+              size_type bucket_count,
+              const Allocator& alloc): robin_map(first, last, bucket_count, Hash(), KeyEqual(), alloc)
     {
     }
     
     template<class InputIt>
-    hopscotch_map(InputIt first, InputIt last,
-                size_type bucket_count,
-                const Hash& hash,
-                const Allocator& alloc) : hopscotch_map(first, last, bucket_count, hash, KeyEqual(), alloc)
+    robin_map(InputIt first, InputIt last,
+              size_type bucket_count,
+              const Hash& hash,
+              const Allocator& alloc): robin_map(first, last, bucket_count, hash, KeyEqual(), alloc)
     {
     }
 
-    hopscotch_map(std::initializer_list<value_type> init,
-                    size_type bucket_count = ht::DEFAULT_INIT_BUCKETS_SIZE,
-                    const Hash& hash = Hash(),
-                    const KeyEqual& equal = KeyEqual(),
-                    const Allocator& alloc = Allocator()) : 
-                    hopscotch_map(init.begin(), init.end(), bucket_count, hash, equal, alloc)
+    robin_map(std::initializer_list<value_type> init,
+              size_type bucket_count = ht::DEFAULT_INIT_BUCKETS_SIZE,
+              const Hash& hash = Hash(),
+              const KeyEqual& equal = KeyEqual(),
+              const Allocator& alloc = Allocator()): 
+          robin_map(init.begin(), init.end(), bucket_count, hash, equal, alloc)
     {
     }
 
-    hopscotch_map(std::initializer_list<value_type> init,
-                    size_type bucket_count,
-                    const Allocator& alloc) : 
-                    hopscotch_map(init.begin(), init.end(), bucket_count, Hash(), KeyEqual(), alloc)
+    robin_map(std::initializer_list<value_type> init,
+              size_type bucket_count,
+              const Allocator& alloc): 
+          robin_map(init.begin(), init.end(), bucket_count, Hash(), KeyEqual(), alloc)
     {
     }
 
-    hopscotch_map(std::initializer_list<value_type> init,
-                    size_type bucket_count,
-                    const Hash& hash,
-                    const Allocator& alloc) : 
-                    hopscotch_map(init.begin(), init.end(), bucket_count, hash, KeyEqual(), alloc)
+    robin_map(std::initializer_list<value_type> init,
+              size_type bucket_count,
+              const Hash& hash,
+              const Allocator& alloc): 
+          robin_map(init.begin(), init.end(), bucket_count, hash, KeyEqual(), alloc)
     {
     }
-
     
-    hopscotch_map& operator=(std::initializer_list<value_type> ilist) {
+    robin_map& operator=(std::initializer_list<value_type> ilist) {
         m_ht.clear();
         
         m_ht.reserve(ilist.size());
@@ -249,14 +245,13 @@ public:
     
     
     
-    
     std::pair<iterator, bool> insert(const value_type& value) { 
         return m_ht.insert(value); 
     }
         
     template<class P, typename std::enable_if<std::is_constructible<value_type, P&&>::value>::type* = nullptr>
     std::pair<iterator, bool> insert(P&& value) { 
-        return m_ht.insert(std::forward<P>(value)); 
+        return m_ht.emplace(std::forward<P>(value)); 
     }
     
     std::pair<iterator, bool> insert(value_type&& value) { 
@@ -265,16 +260,16 @@ public:
     
     
     iterator insert(const_iterator hint, const value_type& value) { 
-        return m_ht.insert(hint, value); 
+        return m_ht.insert_hint(hint, value); 
     }
         
     template<class P, typename std::enable_if<std::is_constructible<value_type, P&&>::value>::type* = nullptr>
     iterator insert(const_iterator hint, P&& value) { 
-        return m_ht.insert(hint, std::forward<P>(value));
+        return m_ht.emplace_hint(hint, std::forward<P>(value));
     }
     
     iterator insert(const_iterator hint, value_type&& value) { 
-        return m_ht.insert(hint, std::move(value)); 
+        return m_ht.insert_hint(hint, std::move(value)); 
     }
     
     
@@ -312,7 +307,6 @@ public:
     
     
     
-    
     /**
      * Due to the way elements are stored, emplace will need to move or copy the key-value once.
      * The method is equivalent to insert(value_type(std::forward<Args>(args)...));
@@ -323,7 +317,6 @@ public:
     std::pair<iterator, bool> emplace(Args&&... args) { 
         return m_ht.emplace(std::forward<Args>(args)...); 
     }
-    
     
     
     
@@ -353,12 +346,12 @@ public:
     
     template<class... Args>
     iterator try_emplace(const_iterator hint, const key_type& k, Args&&... args) {
-        return m_ht.try_emplace(hint, k, std::forward<Args>(args)...);
+        return m_ht.try_emplace_hint(hint, k, std::forward<Args>(args)...);
     }
     
     template<class... Args>
     iterator try_emplace(const_iterator hint, key_type&& k, Args&&... args) {
-        return m_ht.try_emplace(hint, std::move(k), std::forward<Args>(args)...);
+        return m_ht.try_emplace_hint(hint, std::move(k), std::forward<Args>(args)...);
     }
     
     
@@ -397,8 +390,9 @@ public:
     
     
     
+    void swap(robin_map& other) { other.m_ht.swap(m_ht); }
     
-    void swap(hopscotch_map& other) { other.m_ht.swap(m_ht); }
+    
     
     /*
      * Lookup
@@ -501,7 +495,7 @@ public:
      * @copydoc find(const Key& key, std::size_t precalculated_hash)
      */
     const_iterator find(const Key& key, std::size_t precalculated_hash) const { 
-        return m_ht.find(key, precalculated_hash);
+        return m_ht.find(key, precalculated_hash); 
     }
     
     /**
@@ -609,8 +603,8 @@ public:
     float max_load_factor() const { return m_ht.max_load_factor(); }
     void max_load_factor(float ml) { m_ht.max_load_factor(ml); }
     
-    void rehash(size_type count_) { m_ht.rehash(count_); }
-    void reserve(size_type count_) { m_ht.reserve(count_); }
+    void rehash(size_type count) { m_ht.rehash(count); }
+    void reserve(size_type count) { m_ht.reserve(count); }
     
     
     /*
@@ -630,14 +624,12 @@ public:
         return m_ht.mutable_iterator(pos);
     }
     
-    size_type overflow_size() const noexcept { return m_ht.overflow_size(); }
-    
-    friend bool operator==(const hopscotch_map& lhs, const hopscotch_map& rhs) {
+    friend bool operator==(const robin_map& lhs, const robin_map& rhs) {
         if(lhs.size() != rhs.size()) {
             return false;
         }
         
-        for(const auto& element_lhs : lhs) {
+        for(const auto& element_lhs: lhs) {
             const auto it_element_rhs = rhs.find(element_lhs.first);
             if(it_element_rhs == rhs.cend() || element_lhs.second != it_element_rhs->second) {
                 return false;
@@ -647,15 +639,13 @@ public:
         return true;
     }
 
-    friend bool operator!=(const hopscotch_map& lhs, const hopscotch_map& rhs) {
+    friend bool operator!=(const robin_map& lhs, const robin_map& rhs) {
         return !operator==(lhs, rhs);
     }
 
-    friend void swap(hopscotch_map& lhs, hopscotch_map& rhs) {
+    friend void swap(robin_map& lhs, robin_map& rhs) {
         lhs.swap(rhs);
     }
-
-
     
 private:
     ht m_ht;
@@ -663,16 +653,15 @@ private:
 
 
 /**
- * Same as `tsl::hopscotch_map<Key, T, Hash, KeyEqual, Allocator, NeighborhoodSize, StoreHash, tsl::hh::prime_growth_policy>`.
+ * Same as `tsl::robin_map<Key, T, Hash, KeyEqual, Allocator, StoreHash, tsl::rh::prime_growth_policy>`.
  */
 template<class Key, 
          class T, 
          class Hash = std::hash<Key>,
          class KeyEqual = std::equal_to<Key>,
          class Allocator = std::allocator<std::pair<Key, T>>,
-         unsigned int NeighborhoodSize = 62,
          bool StoreHash = false>
-using hopscotch_pg_map = hopscotch_map<Key, T, Hash, KeyEqual, Allocator, NeighborhoodSize, StoreHash, tsl::hh::prime_growth_policy>;
+using robin_pg_map = robin_map<Key, T, Hash, KeyEqual, Allocator, StoreHash, tsl::rh::prime_growth_policy>;
 
 } // end namespace tsl
 
