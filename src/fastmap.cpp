@@ -158,16 +158,16 @@ extern "C" {
     return keys;
   }
 
-  SEXP C_map_keys_idxs(SEXP map_xptr, SEXP sorted_r) {
+  SEXP C_map_keys_idxs(SEXP map_xptr, SEXP sort_r) {
     si_map* map = map_from_xptr(map_xptr);
     SEXP keys = PROTECT(Rf_allocVector(STRSXP, map->size()));
     SEXP idxs = PROTECT(Rf_allocVector(INTSXP, map->size()));
     int* idxs_ = INTEGER(idxs);
 
-    bool sorted = LOGICAL(sorted_r)[0];
+    bool sort = LOGICAL(sort_r)[0];
 
 
-    if (sorted) {
+    if (sort) {
       std::vector<std::string> keys_vec;
       keys_vec.reserve(map->size());
 

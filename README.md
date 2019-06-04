@@ -114,12 +114,12 @@ Unlike with environments, the keys in a fastmap are always encoded as UTF-8, so 
 
 The base R functions `identical()` and `all.equal()` are commonly used to test two objects for equality, but they will not work correctly for fastmap objects. `identical()` will always report `FALSE` for two distinct fastmap objects, even if they have the same contents, while `all.equal()` will always report `TRUE` for two fastmap objects.
 
-To test whether two fastmap objects have the same contents, compare the results of `$as_list(sorted=TRUE)` for both of the objects. For example:
+To test whether two fastmap objects have the same contents, compare the results of `$as_list(sort=TRUE)` for both of the objects. For example:
 
 ```
-identical(a$as_list(sorted = TRUE), b$as_list(sorted = TRUE))
+identical(a$as_list(sort = TRUE), b$as_list(sort = TRUE))
 # or
-all.equal(a$as_list(sorted = TRUE), b$as_list(sorted = TRUE))
+all.equal(a$as_list(sort = TRUE), b$as_list(sort = TRUE))
 ```
 
 These comparisons are subject to the technical details of how `identical()` and `all.equal()` treat named lists.
