@@ -61,17 +61,20 @@ NULL
 #'     from) the map.
 #'   }
 #'   \item{\code{keys(sort = FALSE)}}{
-#'     Returns a character vector of all the keys, in arbitrary order. Note that
-#'     the order can vary across platforms and is not guaranteed to be
-#'     consistent.
+#'     Returns a character vector of all the keys. By default, the keys will be
+#'     in arbitrary order. Note that the order can vary across platforms and is
+#'     not guaranteed to be consistent. With \code{sort=TRUE}, the keys will be
+#'     sorted according to their Unicode code point values.
 #'   }
 #'   \item{\code{size()}}{
 #'     Returns the number of items in the map.
 #'   }
 #'   \item{\code{as_list(sort = FALSE)}}{
 #'     Return a named list where the names are the keys from the map, and the
-#'     values are the values, in arbitrary order. Note that the order can vary
-#'     across platforms and is not guaranteed to be consistent.
+#'     values are the values. By default, the keys will be in arbitrary order.
+#'     Note that the order can vary across platforms and is not guaranteed to
+#'     be consistent. With \code{sort=TRUE}, the keys will be sorted according
+#'     to their Unicode code point values.
 #'   }
 #'   \item{\code{reset()}}{
 #'     Reset the fastmap object, clearing all items.
