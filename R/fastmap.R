@@ -60,7 +60,7 @@ NULL
 #'     a logical vector reporting whether each item existed in (and was removed
 #'     from) the map.
 #'   }
-#'   \item{\code{keys(sorted = FALSE)}}{
+#'   \item{\code{keys(sort = FALSE)}}{
 #'     Returns a character vector of all the keys, in arbitrary order. Note that
 #'     the order can vary across platforms and is not guaranteed to be
 #'     consistent.
@@ -68,7 +68,7 @@ NULL
 #'   \item{\code{size()}}{
 #'     Returns the number of items in the map.
 #'   }
-#'   \item{\code{as_list(sorted = FALSE)}}{
+#'   \item{\code{as_list(sort = FALSE)}}{
 #'     Return a named list where the names are the keys from the map, and the
 #'     values are the values, in arbitrary order. Note that the order can vary
 #'     across platforms and is not guaranteed to be consistent.
@@ -327,14 +327,14 @@ fastmap <- function(missing_default = NULL) {
     n
   }
 
-  keys <- function(sorted = FALSE) {
+  keys <- function(sort = FALSE) {
     ensure_restore_map()
-    .Call(C_map_keys, key_idx_map, sorted)
+    .Call(C_map_keys, key_idx_map, sort)
   }
 
-  as_list <- function(sorted = FALSE) {
+  as_list <- function(sort = FALSE) {
     ensure_restore_map()
-    keys_idxs <- .Call(C_map_keys_idxs, key_idx_map, sorted)
+    keys_idxs <- .Call(C_map_keys_idxs, key_idx_map, sort)
     result <- values[keys_idxs]
     names(result) <- names(keys_idxs)
     result

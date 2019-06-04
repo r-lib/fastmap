@@ -98,7 +98,7 @@ m$get("x")
 
 When you call `m$keys()` or `m$as_list()`, the items are returned in an arbitrary order. Keep in mind that there is no guarantee that the order will be the same across platforms, or across different builds of fastmap.
 
-If you want to guarantee a particular order, you can call `m$keys(sorted=TRUE)` or `m$as_list(sorted=TRUE)`. The result will be a locale-independent sorting of the keys by their Unicode code point values. For example, `é` (Unicode code point 233) comes after `z` (122). If you want the keys to be sorted a different way, you will need to sort them yourself.
+If you want to guarantee a particular order, you can call `m$keys(sort=TRUE)` or `m$as_list(sort=TRUE)`. The result will be a locale-independent sorting of the keys by their Unicode code point values. For example, `é` (Unicode code point 233) comes after `z` (122). If you want the keys to be sorted a different way, you will need to sort them yourself.
 
 ### Serialization
 

@@ -243,9 +243,9 @@ test_that("Vectorized operations are all-or-nothing", {
 test_that("Sorting keys", {
   m <- fastmap()
   m$mset(c = 3, a = 1, ".d" = 4, b = 2)
-  expect_identical(m$keys(sorted = TRUE), c(".d", "a", "b", "c"))
+  expect_identical(m$keys(sort = TRUE), c(".d", "a", "b", "c"))
   expect_identical(
-    m$as_list(sorted = TRUE),
+    m$as_list(sort = TRUE),
     list(".d" = 4, a = 1, b = 2, c = 3)
   )
 
@@ -253,7 +253,7 @@ test_that("Sorting keys", {
   m <- fastmap()
   m$set("é", 1)
   m$set("z", 2)
-  expect_identical(m$keys(sorted = TRUE), c("z", "é"))
+  expect_identical(m$keys(sort = TRUE), c("z", "é"))
 })
 
 test_that("Stress test, compared to environment", {
