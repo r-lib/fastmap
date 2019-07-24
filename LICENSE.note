@@ -1,6 +1,18 @@
+The fastmap package as a whole is distributed under the MIT license, which is
+contained in the file LICENSE.
+
+
+The fastmap package also includes the following third-party library, with the
+following license:
+
+- hopscotch_map (https://github.com/Tessil/hopscotch-map): MIT license
+
+
+Full text of the license for hopscotch_map:
+
 MIT License
 
-Copyright (c) 2019 RStudio
+Copyright (c) 2016 Tessil
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
