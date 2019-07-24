@@ -216,3 +216,82 @@ It does not leak memory, and it does not slow down if you run it repeatedly. Aft
 The simple tests above simply check for the existence of keys, but with setting values, the results are similar.
 
 Note that the environment operations are themselves slightly faster than the fastmap operations, but the penalty is in slower garbage collection when many keys have been used. Also keep in mind that these tests are very artificial and use tens of thousands of random keys; if your application does not do this, then fastmap may have no practical benefit. In general, these operations are so fast that performance bottlenecks almost always lie elsewhere.
+
+
+## Testing your code for symbol leakage
+
+If you want to test your code directly for symbol leakage, you can use the code below.
+
+The `get_symbols()` function returns all symbols that are registered in R's symbol table.
+
+`new_symbols()` returns all symbols that have been added since the last time `new_symbols()` was run. If you want to test whether your code causes the symbol table to grow, run `new_symbols()`, then run your code, then run `new_symbols()` again.
+
+
+```R
+get_symbols <- inline::cfunction(
+  includes = "
+    #define HSIZE   49157 /* The size of the hash table for symbols, from Defn.h */
+    extern SEXP* R_SymbolTable;
+  ",
+  body = "
+    int symbol_count = 0;
+    SEXP s;
+    int j;
+    for (j = 0; j < HSIZE; j++) {
+      for (s = R_SymbolTable[j]; s != R_NilValue; s = CDR(s)) {
+        if (CAR(s) != R_NilValue) {
+          symbol_count++;
+        }
+      }
+    }
+  
+  
+    SEXP result = PROTECT(Rf_allocVector(STRSXP, symbol_count));
+    symbol_count = 0;
+    for (j = 0; j < HSIZE; j++) {
+      for (s = R_SymbolTable[j]; s != R_NilValue; s = CDR(s)) {
+        if (CAR(s) != R_NilValue) {
+          SET_STRING_ELT(result, symbol_count, PRINTNAME(CAR(s)));
+          symbol_count++;
+        }
+      }
+    }
+  
+    UNPROTECT(1);
+    return result;
+  "
+)
+
+# Test it out
+get_symbols()
+
+
+# new_symbols() returns a character vector of symbols that have been added since
+# the last time it was run.
+last_symbols <- get_symbols()
+new_symbols <- function() {
+  cur_symbols <- get_symbols()
+  res <- setdiff(cur_symbols, last_symbols)
+  last_symbols <<- cur_symbols
+  res
+}
+
+# Example
+
+# The first couple times it's run, R might do something that adds symbols, like
+# load the compiler package. Run it a bunch of times until it returns
+# character(0).
+new_symbols()
+new_symbols()
+new_symbols()
+# character(0)
+
+
+# After R stops loading things, run our code and see which new symbols have
+# been added.
+abcdefg <- 1
+e <- new.env()
+e$xyz <- 2
+new_symbols()
+#> [1] "abcdefg" "xyz"
+```
