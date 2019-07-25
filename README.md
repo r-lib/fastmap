@@ -3,8 +3,8 @@ fastmap
 
 <!-- badges: start -->
 [![Travis build status](https://travis-ci.org/r-lib/fastmap.svg?branch=master)](https://travis-ci.org/r-lib/fastmap)
-[![CRAN status](https://www.r-pkg.org/badges/version/fastmap)](https://cran.r-project.org/package=fastmap)
 [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/r-lib/fastmap?branch=master&svg=true)](https://ci.appveyor.com/project/r-lib/fastmap)
+[![CRAN status](https://www.r-pkg.org/badges/version/fastmap)](https://cran.r-project.org/package=fastmap)
 <!-- badges: end -->
 
 **fastmap** is a package that implements _maps_ -- that is, key-value stores -- in R.
