@@ -16,7 +16,7 @@ The usual way of doing this in R is to use environments. However, this method is
 ## Installation
 
 ```R
-devtools::install_github("r-lib/fastmap")
+install.packages("fastmap")
 ```
 
 
@@ -291,8 +291,7 @@ new_symbols()
 # After R stops loading things, run our code and see which new symbols have
 # been added.
 abcdefg <- 1
-e <- new.env()
-e$xyz <- 2
+exists("xyz")
 new_symbols()
 #> [1] "abcdefg" "xyz"
 ```
