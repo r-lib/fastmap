@@ -1,6 +1,6 @@
 Package: fastmap
-Title: Fast implementation of a key-value store
-Version: 0.0.0.9001
+Title: Fast Implementation of a Key-Value Store
+Version: 1.0.0
 Authors@R: c(
     person("Winston", "Chang", email = "winston@rstudio.com", role = c("aut", "cre")),
     person(given = "RStudio", role = c("cph", "fnd")),
