@@ -2,6 +2,7 @@
 #include <Rdefines.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #if __cplusplus >= 201103L
   // tsl::hopscotch_map is faster than std::map, but requires C++11.
