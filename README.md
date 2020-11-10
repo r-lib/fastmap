@@ -3,6 +3,7 @@ fastmap
 
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/fastmap)](https://cran.r-project.org/package=fastmap)
+[![R build status](https://github.com/r-lib/fastmap/workflows/R-CMD-check/badge.svg)](https://github.com/r-lib/fastmap/actions)
 <!-- badges: end -->
 
 **fastmap** is a package that implements _maps_ -- that is, key-value stores -- in R.

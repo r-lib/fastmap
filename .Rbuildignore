@@ -8,3 +8,4 @@
 ^\.travis\.yml$
 ^scripts$
 ^appveyor\.yml$
+^\.github$
