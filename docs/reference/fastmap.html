@@ -8,23 +8,29 @@
 
 <title>Create a fastmap object — fastmap • fastmap</title>
 
+
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
 <!-- headroom.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -32,11 +38,11 @@
 
 
 
-<meta property="og:title" content="Create a fastmap object — fastmap" />
 
+<meta property="og:title" content="Create a fastmap object — fastmap" />
 <meta property="og:description" content="A fastmap object provides a key-value store where the keys are strings and
 the values are any R objects." />
-<meta name="twitter:card" content="summary" />
+
 
 
 
@@ -53,7 +59,7 @@ the values are any R objects." />
 
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -67,7 +73,7 @@ the values are any R objects." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fastmap</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.1</span>
       </span>
     </div>
 
@@ -82,11 +88,13 @@ the values are any R objects." />
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/r-lib/fastmap">
+  <a href="https://github.com/r-lib/fastmap/">
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -110,14 +118,12 @@ the values are any R objects." />
     </div>
 
     <div class="ref-description">
-    
     <p>A fastmap object provides a key-value store where the keys are strings and
 the values are any R objects.</p>
-    
     </div>
 
-    <pre class="usage"><span class='fu'>fastmap</span>(<span class='kw'>missing_default</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
-    
+    <pre class="usage"><span class='fu'>fastmap</span><span class='op'>(</span>missing_default <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -129,7 +135,7 @@ it can be useful to return a sentinel value, such as a
 <code><a href='key_missing.html'>key_missing</a></code> object.</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>In R, it is common to use environments as key-value stores, but they can leak
@@ -151,7 +157,7 @@ the keys to the native encoding, and the keys will be correctly converted to
 UTF-8. With <code>$mget()</code>, the keys will be converted to UTF-8 before they
 are fetched.</p>
 <p>Fastmap objects have the following methods:</p>
-<dl class='dl-horizontal'>
+<dl>
   <dt><code>set(key, value)</code></dt><dd><p>Set a key-value pair. <code>key</code> must be a string. Returns <code>value</code>.</p></dd>
   <dt><code>mset(..., .list = NULL)</code></dt><dd><p>Set multiple key-value pairs. The key-value pairs are named arguments,
     and/or a list passed in as <code>.list</code>. Returns a named list where the
@@ -178,65 +184,71 @@ are fetched.</p>
     be consistent. With <code>sort=TRUE</code>, the keys will be sorted according
     to their Unicode code point values.</p></dd>
   <dt><code>reset()</code></dt><dd><p>Reset the fastmap object, clearing all items.</p></dd>
+
 </dl>
 
-    
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># Create the fastmap object</span>
-<span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'>fastmap</span>()
+<span class='va'>m</span> <span class='op'>&lt;-</span> <span class='fu'>fastmap</span><span class='op'>(</span><span class='op'>)</span>
 
 <span class='co'># Set some key-value pairs</span>
-<span class='no'>m</span>$<span class='fu'>set</span>(<span class='st'>"x"</span>, <span class='fl'>100</span>)
-<span class='no'>m</span>$<span class='fu'>set</span>(<span class='st'>"letters"</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"a"</span>, <span class='st'>"b"</span>, <span class='st'>"c"</span>))
-<span class='no'>m</span>$<span class='fu'>mset</span>(<span class='kw'>numbers</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>10</span>, <span class='fl'>20</span>, <span class='fl'>30</span>), <span class='kw'>nothing</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='va'>m</span><span class='op'>$</span><span class='fu'>set</span><span class='op'>(</span><span class='st'>"x"</span>, <span class='fl'>100</span><span class='op'>)</span>
+<span class='va'>m</span><span class='op'>$</span><span class='fu'>set</span><span class='op'>(</span><span class='st'>"letters"</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"a"</span>, <span class='st'>"b"</span>, <span class='st'>"c"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>m</span><span class='op'>$</span><span class='fu'>mset</span><span class='op'>(</span>numbers <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>10</span>, <span class='fl'>20</span>, <span class='fl'>30</span><span class='op'>)</span>, nothing <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
 
 <span class='co'># Get values using keys</span>
-<span class='no'>m</span>$<span class='fu'><a href='https://rdrr.io/r/base/get.html'>get</a></span>(<span class='st'>"x"</span>)</div><div class='output co'>#&gt; [1] 100</div><div class='input'><span class='no'>m</span>$<span class='fu'><a href='https://rdrr.io/r/base/get.html'>get</a></span>(<span class='st'>"numbers"</span>)</div><div class='output co'>#&gt; [1] 10 20 30</div><div class='input'><span class='no'>m</span>$<span class='fu'><a href='https://rdrr.io/r/base/get.html'>mget</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"letters"</span>, <span class='st'>"numbers"</span>))</div><div class='output co'>#&gt; $letters
+<span class='va'>m</span><span class='op'>$</span><span class='fu'>get</span><span class='op'>(</span><span class='st'>"x"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; [1] 100</div><div class='input'><span class='va'>m</span><span class='op'>$</span><span class='fu'>get</span><span class='op'>(</span><span class='st'>"numbers"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; [1] 10 20 30</div><div class='input'><span class='va'>m</span><span class='op'>$</span><span class='fu'>mget</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"letters"</span>, <span class='st'>"numbers"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; $letters
 #&gt; [1] "a" "b" "c"
 #&gt; 
 #&gt; $numbers
 #&gt; [1] 10 20 30
 #&gt; </div><div class='input'>
 <span class='co'># Missing keys return NULL by default, but this can be customized</span>
-<span class='no'>m</span>$<span class='fu'><a href='https://rdrr.io/r/base/get.html'>get</a></span>(<span class='st'>"xyz"</span>)</div><div class='output co'>#&gt; NULL</div><div class='input'>
+<span class='va'>m</span><span class='op'>$</span><span class='fu'>get</span><span class='op'>(</span><span class='st'>"xyz"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; NULL</div><div class='input'>
 <span class='co'># Check for existence of keys</span>
-<span class='no'>m</span>$<span class='fu'>has</span>(<span class='st'>"x"</span>)</div><div class='output co'>#&gt; [1] TRUE</div><div class='input'><span class='no'>m</span>$<span class='fu'>has</span>(<span class='st'>"nothing"</span>)</div><div class='output co'>#&gt; [1] TRUE</div><div class='input'><span class='no'>m</span>$<span class='fu'>has</span>(<span class='st'>"xyz"</span>)</div><div class='output co'>#&gt; [1] FALSE</div><div class='input'>
+<span class='va'>m</span><span class='op'>$</span><span class='fu'>has</span><span class='op'>(</span><span class='st'>"x"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; [1] TRUE</div><div class='input'><span class='va'>m</span><span class='op'>$</span><span class='fu'>has</span><span class='op'>(</span><span class='st'>"nothing"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; [1] TRUE</div><div class='input'><span class='va'>m</span><span class='op'>$</span><span class='fu'>has</span><span class='op'>(</span><span class='st'>"xyz"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; [1] FALSE</div><div class='input'>
 <span class='co'># Remove one or more items</span>
-<span class='no'>m</span>$<span class='fu'><a href='https://rdrr.io/r/base/rm.html'>remove</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"letters"</span>, <span class='st'>"x"</span>))
+<span class='va'>m</span><span class='op'>$</span><span class='fu'>remove</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"letters"</span>, <span class='st'>"x"</span><span class='op'>)</span><span class='op'>)</span>
 
 <span class='co'># Return number of items</span>
-<span class='no'>m</span>$<span class='fu'>size</span>()</div><div class='output co'>#&gt; [1] 2</div><div class='input'>
+<span class='va'>m</span><span class='op'>$</span><span class='fu'>size</span><span class='op'>(</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; [1] 2</div><div class='input'>
 <span class='co'># Get all keys</span>
-<span class='no'>m</span>$<span class='fu'>keys</span>()</div><div class='output co'>#&gt; [1] "numbers" "nothing"</div><div class='input'>
+<span class='va'>m</span><span class='op'>$</span><span class='fu'>keys</span><span class='op'>(</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; [1] "numbers" "nothing"</div><div class='input'>
 <span class='co'># Return named list that represents all key-value pairs</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span>(<span class='no'>m</span>$<span class='fu'>as_list</span>())</div><div class='output co'>#&gt; List of 2
+<span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span><span class='op'>(</span><span class='va'>m</span><span class='op'>$</span><span class='fu'>as_list</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; List of 2
 #&gt;  $ numbers: num [1:3] 10 20 30
 #&gt;  $ nothing: NULL</div><div class='input'>
 <span class='co'># Clear the map</span>
-<span class='no'>m</span>$<span class='fu'>reset</span>()
+<span class='va'>m</span><span class='op'>$</span><span class='fu'>reset</span><span class='op'>(</span><span class='op'>)</span>
 
 
 <span class='co'># Specify missing value when get() is called</span>
-<span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'>fastmap</span>()
-<span class='no'>m</span>$<span class='fu'><a href='https://rdrr.io/r/base/get.html'>get</a></span>(<span class='st'>"x"</span>, <span class='kw'>missing</span> <span class='kw'>=</span> <span class='fu'><a href='key_missing.html'>key_missing</a></span>())</div><div class='output co'>#&gt; &lt;Key Missing&gt;</div><div class='input'><span class='co'>#&gt; &lt;Key Missing&gt;</span>
+<span class='va'>m</span> <span class='op'>&lt;-</span> <span class='fu'>fastmap</span><span class='op'>(</span><span class='op'>)</span>
+<span class='va'>m</span><span class='op'>$</span><span class='fu'>get</span><span class='op'>(</span><span class='st'>"x"</span>, missing <span class='op'>=</span> <span class='fu'><a href='key_missing.html'>key_missing</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; &lt;Key Missing&gt;</div><div class='input'><span class='co'>#&gt; &lt;Key Missing&gt;</span>
 
 <span class='co'># Specify the default missing value</span>
-<span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'>fastmap</span>(<span class='kw'>missing_default</span> <span class='kw'>=</span> <span class='fu'><a href='key_missing.html'>key_missing</a></span>())
-<span class='no'>m</span>$<span class='fu'><a href='https://rdrr.io/r/base/get.html'>get</a></span>(<span class='st'>"x"</span>)</div><div class='output co'>#&gt; &lt;Key Missing&gt;</div><div class='input'>#> <Key Missing>
+<span class='va'>m</span> <span class='op'>&lt;-</span> <span class='fu'>fastmap</span><span class='op'>(</span>missing_default <span class='op'>=</span> <span class='fu'><a href='key_missing.html'>key_missing</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>m</span><span class='op'>$</span><span class='fu'>get</span><span class='op'>(</span><span class='st'>"x"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; &lt;Key Missing&gt;</div><div class='input'><span class='co'>#&gt; &lt;Key Missing&gt;</span>
 
 </div></pre>
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      
-      <li><a href="#details">Details</a></li>
-      
-      <li><a href="#examples">Examples</a></li>
-    </ul>
-
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 
@@ -247,7 +259,7 @@ are fetched.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.9100.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>
