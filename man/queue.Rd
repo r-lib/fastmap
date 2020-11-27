@@ -4,11 +4,14 @@
 \alias{queue}
 \title{Create a queue}
 \usage{
-queue(init = 20)
+queue(init = 20, missing_default = NULL)
 }
 \arguments{
 \item{init}{Initial size of the list that backs the queue. This is also used
 as the minimum size of the list; it will not shrink any smaller.}
+
+\item{missing_default}{The value to return when \code{remove()} or \code{peek()} are
+called when the stack is empty. Default is \code{NULL}.}
 }
 \description{
 A queue object is backed by a list, which is used in a circular manner. The

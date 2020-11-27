@@ -4,11 +4,14 @@
 \alias{stack}
 \title{Create a stack}
 \usage{
-stack(init = 20)
+stack(init = 20, missing_default = NULL)
 }
 \arguments{
 \item{init}{Initial size of the list that backs the stack. This is also used
 as the minimum size of the list; it will not shrink any smaller.}
+
+\item{missing_default}{The value to return when \code{pop()} or \code{peek()} are
+called when the stack is empty. Default is \code{NULL}.}
 }
 \description{
 A stack object is backed by a list. The backing list will grow or shrink as
