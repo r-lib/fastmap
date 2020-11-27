@@ -36,6 +36,27 @@ test_that("Removing from empty queue", {
 })
 
 
+test_that("Different values when removing from an empty queue", {
+  q <- queue()
+  expect_identical(q$remove(missing = "foo"), "foo")
+  expect_identical(q$peek(missing = "foo"), "foo")
+
+
+  q <- queue(missing_default = key_missing())
+  expect_identical(q$remove(), key_missing())
+
+  q$add(5)
+  q$add(6)
+  expect_identical(q$remove(), 5)
+  expect_identical(q$remove(), 6)
+  expect_identical(q$remove(), key_missing())
+  expect_identical(q$peek(), key_missing())
+
+  expect_identical(q$remove(missing = "foo"), "foo")
+  expect_identical(q$peek(missing = "foo"), "foo")
+})
+
+
 test_that("Resizing", {
   # Starting index 1, grow
   q <- queue(3)

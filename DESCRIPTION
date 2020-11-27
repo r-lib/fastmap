@@ -19,3 +19,4 @@ Suggests:
     testthat (>= 2.1.1)
 URL: https://r-lib.github.io/fastmap/, https://github.com/r-lib/fastmap
 BugReports: https://github.com/r-lib/fastmap/issues
+Roxygen: list(markdown = TRUE)

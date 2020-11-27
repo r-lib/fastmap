@@ -5,8 +5,12 @@
 #'
 #' @param init Initial size of the list that backs the stack. This is also used
 #'   as the minimum size of the list; it will not shrink any smaller.
+#' @param missing_default The value to return when `pop()` or `peek()` are
+#'   called when the stack is empty. Default is `NULL`.
 #' @export
-stack <- function(init = 20) {
+stack <- function(init = 20, missing_default = NULL) {
+  force(missing_default)
+
   # A list that represents the stack
   s <- vector("list", init)
   # Current size of the stack
@@ -21,15 +25,17 @@ stack <- function(init = 20) {
     }
     new_size <- count + length(args)
 
+    # R 3.4.0 and up will automatically grow vectors in place, if possible, so
+    # we don't need to explicitly grow the list here.
     s[count + seq_along(args)] <<- args
     count <<- new_size
 
     invisible()
   }
 
-  pop <- function() {
+  pop <- function(missing = missing_default) {
     if (count == 0L) {
-      return(NULL)
+      return(missing)
     }
 
     value <- s[[count]]
@@ -46,9 +52,9 @@ stack <- function(init = 20) {
     value
   }
 
-  peek <- function() {
+  peek <- function(missing = missing_default) {
     if (count == 0L) {
-      return(NULL)
+      return(missing)
     }
     s[[count]]
   }

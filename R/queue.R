@@ -5,8 +5,12 @@
 #'
 #' @param init Initial size of the list that backs the queue. This is also used
 #'   as the minimum size of the list; it will not shrink any smaller.
+#' @param missing_default The value to return when `remove()` or `peek()` are
+#'   called when the stack is empty. Default is `NULL`.
 #' @export
-queue <- function(init = 20) {
+queue <- function(init = 20, missing_default = NULL) {
+  force(missing_default)
+
   q <- vector("list", init)
   head <- 0L  # Index of most recently added item
   tail <- 0L  # Index of oldest item (next to be removed)
@@ -57,9 +61,9 @@ queue <- function(init = 20) {
     invisible()
   }
 
-  remove <- function() {
+  remove <- function(missing = missing_default) {
     if (tail == 0L)
-      return(NULL)
+      return(missing)
 
     len <- length(q)
     value <- q[[tail]]
@@ -83,9 +87,9 @@ queue <- function(init = 20) {
     value
   }
 
-  peek <- function() {
+  peek <- function(missing = missing_default) {
     if (tail == 0L)
-      return(NULL)
+      return(missing)
 
     q[[tail]]
   }

@@ -72,6 +72,28 @@ test_that("Popping from empty stack", {
 })
 
 
+test_that("Different values when popping from an empty stack", {
+  s <- stack()
+  expect_identical(s$pop(missing = "foo"), "foo")
+  expect_identical(s$peek(missing = "foo"), "foo")
+
+
+  s <- stack(missing_default = key_missing())
+  expect_identical(s$pop(), key_missing())
+  expect_identical(s$pop(), key_missing())
+  expect_identical(s$peek(), key_missing())
+  expect_true(s$empty())
+
+  s$push(5)
+  s$push(6)
+  expect_identical(s$pop(), 6)
+  expect_identical(s$pop(), 5)
+  expect_identical(s$pop(missing = "foo"), "foo")
+  expect_identical(s$pop(), key_missing())
+
+})
+
+
 test_that("Error expressions prevent any from being added", {
   s <- stack()
   expect_error(s$push(1, stop("2"), 3))
