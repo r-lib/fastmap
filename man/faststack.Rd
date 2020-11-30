@@ -21,26 +21,34 @@ the stack changes in size.
 \code{faststack} objects have the following methods:
 
 \describe{
-\item{\code{push(..., .list = NULL)}}{
+\item{\code{push(x)}}{
+Push an object onto the stack.
+}
+\item{\code{mpush(..., .list = NULL)}}{
 Push objects onto the stack. \code{.list} can be a list of objects to add.
 }
 \item{\code{pop(missing = missing_default)}}{
 Remove and return the top object on the stack. If the stack is empty,
 it will return \code{missing}, which defaults to the value of
-\code{missing_default} that \code{stack()} was created with.
+\code{missing_default} that \code{stack()} was created with (typically, \code{NULL}).
+}
+\item{\code{mpop(n, missing = missing_default)}}{
+Remove and return the top \code{n} objects on the stack, in a list. The first
+element of the list is the top object in the stack. If \code{n} is greater
+than the number of objects in the stack, any requested items beyond
+those in the stack will be replaced with \code{missing} (typically, \code{NULL}).
 }
 \item{\code{peek(missing = missing_default)}}{
 Return the top object on the stack, but do not remove it from the stack.
-If the stack is empty, this will return \code{missing}, which defaults to the
-value of \code{missing_default} that \code{stack()} was created with.
+If the stack is empty, this will return \code{missing}.
 }
 \item{\code{reset()}}{
 Reset the stack, clearing all items.
 }
 \item{\code{size()}}{
-Returns the number of items in the stack
+Returns the number of items in the stack.
 }
-\item{\code{as_list(sort = FALSE)}}{
+\item{\code{as_list()}}{
 Return a list containing the objects in the stack, where the first
 element in the list is the object at the bottom of the stack, and the
 last element in the list is the object at the top of the stack.

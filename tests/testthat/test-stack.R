@@ -6,9 +6,9 @@ test_that("Basic operations", {
   s$push(6)
   s$push(NULL)
   s$push(list(a=1, b=2))
-  s$push(.list=list(NULL))
-  s$push(.list=list(NULL,7))
-  s$push(8, .list=list(10), 9)
+  s$mpush(.list=list(NULL))
+  s$mpush(.list=list(NULL,7))
+  s$mpush(8, .list=list(10), 9)
 
   # as_list() returns in the order that they were inserted
   expect_identical(
@@ -48,9 +48,9 @@ test_that("Basic operations", {
 
 test_that("Pushing multiple", {
   s <- faststack()
-  s$push(1,2,3)
-  s$push(4,5, .list = list(6, list(7,8)))
-  s$push(9,10)
+  s$mpush(1,2,3)
+  s$mpush(4,5, .list = list(6, list(7,8)))
+  s$mpush(9,10)
   expect_identical(s$as_list(), list(1,2,3,4,5,6,list(7,8),9,10))
   expect_identical(s$pop(), 10)
   expect_identical(s$pop(), 9)
@@ -104,4 +104,33 @@ test_that("Error expressions prevent any from being added", {
   expect_identical(s$size(), 0L)
   expect_null(s$peek())
   expect_identical(s$as_list(), list())
+})
+
+
+test_that("mpop()", {
+  s <- faststack(2L)
+  s$mpush(1,2,3,4,5,6,7,8,9,10,11,12,13)
+  expect_identical(s$mpop(6), list(13,12,11,10,9,8))
+  expect_identical(s$as_list(), list(1,2,3,4,5,6,7))
+  expect_identical(s$size(), 7L)
+  # Check that we did NOT resize the underlying list since we haven't gone under
+  # the 1/2 threshold.
+  expect_identical(env(s)$s, c(list(1,2,3,4,5,6,7), rep(list(NULL), 6)))
+
+  expect_identical(s$mpop(1), list(7))
+  expect_identical(s$as_list(), list(1,2,3,4,5,6))
+  expect_identical(s$size(), 6L)
+  # Now we should have resized.
+  expect_identical(env(s)$s, list(1,2,3,4,5,6))
+
+  expect_identical(s$mpop(9), list(6,5,4,3,2,1,NULL,NULL,NULL))
+  expect_identical(env(s)$s, list(NULL,NULL))
+  expect_identical(s$size(), 0L)
+
+  # Different `missing`
+  s <- faststack(2, missing_default = NA)
+  s$mpush(1,2,3,4,5,6,7,8,9,10,11,12,13)
+  expect_identical(s$mpop(6), list(13,12,11,10,9,8))
+  expect_identical(s$mpop(9), list(7,6,5,4,3,2,1,NA,NA))
+  expect_identical(s$mpop(3, missing = "x"), list("x","x","x"))
 })
