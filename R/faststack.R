@@ -1,9 +1,9 @@
 #' Create a stack
 #'
-#' A stack object is backed by a list. The backing list will grow or shrink as
+#' A `faststack` is backed by a list. The backing list will grow or shrink as
 #' the stack changes in size.
 #'
-#' `stack` objects have the following methods:
+#' `faststack` objects have the following methods:
 #'
 #' \describe{
 #'   \item{\code{push(..., .list = NULL)}}{
@@ -38,7 +38,7 @@
 #' @param missing_default The value to return when `pop()` or `peek()` are
 #'   called when the stack is empty. Default is `NULL`.
 #' @export
-stack <- function(init = 20, missing_default = NULL) {
+faststack <- function(init = 20, missing_default = NULL) {
   force(missing_default)
 
   # A list that represents the stack

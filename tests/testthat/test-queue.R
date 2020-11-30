@@ -4,7 +4,7 @@ env <- function(x) {
 }
 
 test_that("Basic operations", {
-  q <- queue(3)
+  q <- fastqueue(3)
   q$add(1)
   q$add(2)
   q$add(3)
@@ -24,7 +24,7 @@ test_that("Basic operations", {
 
 
 test_that("Removing from empty queue", {
-  q <- queue()
+  q <- fastqueue()
   expect_null(q$remove())
   expect_null(q$remove())
   expect_identical(q$size(), 0L)
@@ -37,7 +37,7 @@ test_that("Removing from empty queue", {
 
 
 test_that("Adding NULL to a queue", {
-  q <- queue()
+  q <- fastqueue()
   q$add(NULL)
   expect_identical(q$as_list(), list(NULL))
 
@@ -59,12 +59,12 @@ test_that("Adding NULL to a queue", {
 
 
 test_that("Different values when removing from an empty queue", {
-  q <- queue()
+  q <- fastqueue()
   expect_identical(q$remove(missing = "foo"), "foo")
   expect_identical(q$peek(missing = "foo"), "foo")
 
 
-  q <- queue(missing_default = key_missing())
+  q <- fastqueue(missing_default = key_missing())
   expect_identical(q$remove(), key_missing())
 
   q$add(5)
@@ -80,7 +80,7 @@ test_that("Different values when removing from an empty queue", {
 
 
 test_that("Adding multiple items", {
-  q <- queue(3)
+  q <- fastqueue(3)
   q$add(1, .list = list(3), 2)
   expect_identical(env(q)$q, list(1,2,3))
   expect_identical(q$as_list(), list(1,2,3))
@@ -98,7 +98,7 @@ test_that("Adding multiple items", {
   expect_identical(env(q)$q, list(13,14,15,16,NULL,6,7,8,9,10,11,12))
 
 
-  q <- queue(3)
+  q <- fastqueue(3)
   # Should double to size 6
   q$add(1,2,3,4,5,6)
   expect_identical(q$as_list(), list(1,2,3,4,5,6))
@@ -119,7 +119,7 @@ test_that("Adding multiple items", {
 
 test_that("Resizing", {
   # Starting index 1, grow
-  q <- queue(3)
+  q <- fastqueue(3)
   q$add(1)
   q$add(2)
   q$add(3)
@@ -128,7 +128,7 @@ test_that("Resizing", {
   expect_identical(q$as_list(), list(1,2,3))
 
   # Starting index 2, grow
-  q <- queue(3)
+  q <- fastqueue(3)
   q$add(1)
   q$add(2)
   q$add(3)
@@ -138,7 +138,7 @@ test_that("Resizing", {
   expect_identical(q$as_list(), list(2,3))
 
   # Starting index 3, wrap around, grow
-  q <- queue(3)
+  q <- fastqueue(3)
   q$add(1)
   q$add(2)
   q$add(3)
@@ -151,7 +151,7 @@ test_that("Resizing", {
   expect_identical(q$as_list(), list(3,4,5))
 
   # Starting index 1, shrink
-  q <- queue(4)
+  q <- fastqueue(4)
   q$add(1)
   q$add(2)
   env(q)$.resize(2)
@@ -159,7 +159,7 @@ test_that("Resizing", {
   expect_identical(q$as_list(), list(1,2))
 
   # Starting index 2, shrink
-  q <- queue(4)
+  q <- fastqueue(4)
   q$add(1)
   q$add(2)
   q$add(3)
@@ -169,7 +169,7 @@ test_that("Resizing", {
   expect_identical(q$as_list(), list(2,3))
 
   # Starting index 3, wrap around, shrink
-  q <- queue(4)
+  q <- fastqueue(4)
   q$add(1)
   q$add(2)
   q$add(3)
@@ -182,7 +182,7 @@ test_that("Resizing", {
   expect_identical(q$as_list(), list(3,4,5))
 
   # Can't shrink smaller than number of items
-  q <- queue(4)
+  q <- fastqueue(4)
   q$add(1)
   q$add(2)
   q$add(3)
@@ -193,7 +193,7 @@ test_that("Resizing", {
 
 
 test_that("Error expressions don't result in inconsistent state", {
-  q <- queue(4)
+  q <- fastqueue(4)
   q$add(1)
   expect_error(q$add(stop("2")))
   q$add(3)
@@ -206,7 +206,7 @@ test_that("Error expressions don't result in inconsistent state", {
 
 
 test_that("Random walk test", {
-  q <- queue()
+  q <- fastqueue()
 
   set.seed(1312)
   ops <- integer(2e5)

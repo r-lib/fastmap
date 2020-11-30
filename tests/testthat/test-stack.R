@@ -1,5 +1,5 @@
 test_that("Basic operations", {
-  s <- stack()
+  s <- faststack()
   expect_identical(s$size(), 0L)
 
   s$push(5)
@@ -47,7 +47,7 @@ test_that("Basic operations", {
 
 
 test_that("Pushing multiple", {
-  s <- stack()
+  s <- faststack()
   s$push(1,2,3)
   s$push(4,5, .list = list(6, list(7,8)))
   s$push(9,10)
@@ -59,7 +59,7 @@ test_that("Pushing multiple", {
 
 
 test_that("Popping from empty stack", {
-  s <- stack()
+  s <- faststack()
   expect_null(s$pop())
   expect_null(s$pop())
   expect_null(s$peek())
@@ -72,12 +72,12 @@ test_that("Popping from empty stack", {
 
 
 test_that("Different values when popping from an empty stack", {
-  s <- stack()
+  s <- faststack()
   expect_identical(s$pop(missing = "foo"), "foo")
   expect_identical(s$peek(missing = "foo"), "foo")
 
 
-  s <- stack(missing_default = key_missing())
+  s <- faststack(missing_default = key_missing())
   expect_identical(s$pop(), key_missing())
   expect_identical(s$pop(), key_missing())
   expect_identical(s$peek(), key_missing())
@@ -94,7 +94,7 @@ test_that("Different values when popping from an empty stack", {
 
 
 test_that("Error expressions prevent any from being added", {
-  s <- stack()
+  s <- faststack()
   expect_error(s$push(1, stop("2"), 3))
   expect_identical(s$size(), 0L)
   expect_null(s$peek())

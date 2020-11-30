@@ -1,9 +1,9 @@
 #' Create a queue
 #'
-#' A queue object is backed by a list, which is used in a circular manner. The
+#' A `fastqueue` is backed by a list, which is used in a circular manner. The
 #' backing list will grow or shrink as the queue changes in size.
 #'
-#' `queue` objects have the following methods:
+#' `fastqueue` objects have the following methods:
 #'
 #' \describe{
 #'   \item{\code{add(..., .list = NULL)}}{
@@ -40,7 +40,7 @@
 #' @param missing_default The value to return when `remove()` or `peek()` are
 #'   called when the stack is empty. Default is `NULL`.
 #' @export
-queue <- function(init = 20, missing_default = NULL) {
+fastqueue <- function(init = 20, missing_default = NULL) {
   force(missing_default)
 
   q    <- vector("list", init)
