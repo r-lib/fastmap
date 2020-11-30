@@ -17,3 +17,35 @@ called when the stack is empty. Default is \code{NULL}.}
 A queue object is backed by a list, which is used in a circular manner. The
 backing list will grow or shrink as the queue changes in size.
 }
+\details{
+\code{queue} objects have the following methods:
+
+\describe{
+\item{\code{add(..., .list = NULL)}}{
+Add objects to the queue. \code{.list} can be a list of objects to add.
+}
+\item{\code{remove(missing = missing_default)}}{
+Remove and return the next object in the queue, but do not remove it from
+the queue. If the queue is empty, this will return \code{missing}, which
+defaults to the value of \code{missing_default} that \code{queue()} was created
+with.
+}
+\item{\code{peek(missing = missing_default)}}{
+Return the next object in the queue. If the queue is empty,
+it will return \code{missing}, which defaults to the value of
+\code{missing_default} that \code{queue()} was created with.
+}
+\item{\code{reset()}}{
+Reset the queue, clearing all items.
+}
+\item{\code{size()}}{
+Returns the number of items in the queue.
+}
+\item{\code{as_list(sort = FALSE)}}{
+Return a list containing the objects in the queue, where the first
+element in the list is oldest object in the queue (in other words, it is
+the next item that would exit the queue), and the last element in the
+list is the most recently added object.
+}
+}
+}

@@ -39,7 +39,7 @@ the keys to the native encoding, and the keys will be correctly converted to
 UTF-8. With \code{$mget()}, the keys will be converted to UTF-8 before they
 are fetched.
 
-Fastmap objects have the following methods:
+\code{fastmap} objects have the following methods:
 
 \describe{
 \item{\code{set(key, value)}}{

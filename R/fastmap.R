@@ -30,7 +30,7 @@ NULL
 #' are fetched.
 #'
 #'
-#' Fastmap objects have the following methods:
+#' `fastmap` objects have the following methods:
 #'
 #' \describe{
 #'   \item{\code{set(key, value)}}{

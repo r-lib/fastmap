@@ -17,3 +17,33 @@ called when the stack is empty. Default is \code{NULL}.}
 A stack object is backed by a list. The backing list will grow or shrink as
 the stack changes in size.
 }
+\details{
+\code{stack} objects have the following methods:
+
+\describe{
+\item{\code{push(..., .list = NULL)}}{
+Push objects onto the stack. \code{.list} can be a list of objects to add.
+}
+\item{\code{pop(missing = missing_default)}}{
+Remove and return the top object on the stack. If the stack is empty,
+it will return \code{missing}, which defaults to the value of
+\code{missing_default} that \code{stack()} was created with.
+}
+\item{\code{peek(missing = missing_default)}}{
+Return the top object on the stack, but do not remove it from the stack.
+If the stack is empty, this will return \code{missing}, which defaults to the
+value of \code{missing_default} that \code{stack()} was created with.
+}
+\item{\code{reset()}}{
+Reset the stack, clearing all items.
+}
+\item{\code{size()}}{
+Returns the number of items in the stack
+}
+\item{\code{as_list(sort = FALSE)}}{
+Return a list containing the objects in the stack, where the first
+element in the list is the object at the bottom of the stack, and the
+last element in the list is the object at the top of the stack.
+}
+}
+}
