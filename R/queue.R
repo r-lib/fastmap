@@ -111,10 +111,6 @@ queue <- function(init = 20, missing_default = NULL) {
     q[[tail]]
   }
 
-  empty <- function() {
-    head == 0L
-  }
-
   reset <- function() {
     q    <<- vector("list", init)
     head <<- 0L
@@ -177,7 +173,6 @@ queue <- function(init = 20, missing_default = NULL) {
     add     = add,
     remove  = remove,
     peek    = peek,
-    empty   = empty,
     reset   = reset,
     size    = size,
     as_list = as_list

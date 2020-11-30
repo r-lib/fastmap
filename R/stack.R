@@ -59,10 +59,6 @@ stack <- function(init = 20, missing_default = NULL) {
     s[[count]]
   }
 
-  empty <- function() {
-    count == 0L
-  }
-
   reset <- function() {
     s <<- vector("list", init)
     count <<- 0L
@@ -84,7 +80,6 @@ stack <- function(init = 20, missing_default = NULL) {
     push    = push,
     pop     = pop,
     peek    = peek,
-    empty   = empty,
     reset   = reset,
     size    = size,
     as_list = as_list

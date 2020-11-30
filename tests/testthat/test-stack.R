@@ -1,6 +1,5 @@
 test_that("Basic operations", {
   s <- stack()
-  expect_true(s$empty())
   expect_identical(s$size(), 0L)
 
   s$push(5)
@@ -64,7 +63,7 @@ test_that("Popping from empty stack", {
   expect_null(s$pop())
   expect_null(s$pop())
   expect_null(s$peek())
-  expect_true(s$empty())
+  expect_identical(s$size(), 0L)
 
   s$push(5)
   s$push(6)
@@ -82,7 +81,7 @@ test_that("Different values when popping from an empty stack", {
   expect_identical(s$pop(), key_missing())
   expect_identical(s$pop(), key_missing())
   expect_identical(s$peek(), key_missing())
-  expect_true(s$empty())
+  expect_identical(s$size(), 0L)
 
   s$push(5)
   s$push(6)

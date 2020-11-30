@@ -27,7 +27,7 @@ test_that("Removing from empty queue", {
   q <- queue()
   expect_null(q$remove())
   expect_null(q$remove())
-  expect_true(q$empty())
+  expect_identical(q$size(), 0L)
   expect_identical(q$as_list(), list())
 
   q$add(5)
