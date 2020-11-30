@@ -1,8 +1,3 @@
-# Get the environment from the queue object, so we can access internal objects.
-env <- function(x) {
-  environment(x$as_list)
-}
-
 test_that("Basic operations", {
   q <- fastqueue(3)
   q$add(1)
