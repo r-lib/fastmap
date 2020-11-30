@@ -36,6 +36,28 @@ test_that("Removing from empty queue", {
 })
 
 
+test_that("Adding NULL to a queue", {
+  q <- queue()
+  q$add(NULL)
+  expect_identical(q$as_list(), list(NULL))
+
+  # Do some other weird combinations of adding NULL
+  q$add(NULL, NULL)
+  q$add(.list = list(NULL))
+  q$add(NULL, .list = list(NULL, NULL))
+
+  expect_identical(q$as_list(), list(NULL, NULL, NULL, NULL, NULL, NULL, NULL))
+  expect_identical(q$remove(missing = "foo"), NULL)
+  expect_identical(q$remove(missing = "foo"), NULL)
+  expect_identical(q$remove(missing = "foo"), NULL)
+  expect_identical(q$remove(missing = "foo"), NULL)
+  expect_identical(q$remove(missing = "foo"), NULL)
+  expect_identical(q$remove(missing = "foo"), NULL)
+  expect_identical(q$remove(missing = "foo"), NULL)
+  expect_identical(q$remove(missing = "foo"), "foo")
+})
+
+
 test_that("Different values when removing from an empty queue", {
   q <- queue()
   expect_identical(q$remove(missing = "foo"), "foo")
@@ -54,6 +76,44 @@ test_that("Different values when removing from an empty queue", {
 
   expect_identical(q$remove(missing = "foo"), "foo")
   expect_identical(q$peek(missing = "foo"), "foo")
+})
+
+
+test_that("Adding multiple items", {
+  q <- queue(3)
+  q$add(1, .list = list(3), 2)
+  expect_identical(env(q)$q, list(1,2,3))
+  expect_identical(q$as_list(), list(1,2,3))
+
+  # Should cause two doublings, to capacity of 12
+  q$add(4,5,6,7)
+  expect_identical(env(q)$q, list(1,2,3,4,5,6,7,NULL,NULL,NULL,NULL,NULL))
+  expect_identical(q$as_list(), list(1,2,3,4,5,6,7))
+
+  q$add(8,9)
+  for (i in 1:5) q$remove()
+  # Wrapping around
+  q$add(10,11,12,13,14,15,16)
+  expect_identical(q$as_list(), as.list(as.numeric(6:16)))
+  expect_identical(env(q)$q, list(13,14,15,16,NULL,6,7,8,9,10,11,12))
+
+
+  q <- queue(3)
+  # Should double to size 6
+  q$add(1,2,3,4,5,6)
+  expect_identical(q$as_list(), list(1,2,3,4,5,6))
+  expect_identical(q$remove(), 1)
+  q$add(7,8,9,10,11,12,13,14)
+  expect_equal(length(env(q)$q), 24)
+  expect_identical(q$as_list(), as.list(as.numeric(2:14)))
+  expect_identical(env(q)$q[1:13], as.list(as.numeric(2:14)))
+  for (i in 1:7) q$remove()
+  expect_equal(length(env(q)$q), 24)
+  expect_identical(q$as_list(), as.list(as.numeric(9:14)))
+
+  # This should cause a shrink because we passed the 1/4 threshold
+  expect_identical(q$remove(), 9)
+  expect_identical(env(q)$q, list(10,11,12,13,14,NULL))
 })
 
 

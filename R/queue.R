@@ -11,61 +11,75 @@
 queue <- function(init = 20, missing_default = NULL) {
   force(missing_default)
 
-  q <- vector("list", init)
+  q    <- vector("list", init)
   head <- 0L  # Index of most recently added item
   tail <- 0L  # Index of oldest item (next to be removed)
+  n    <- 0L  # Number of items in queue
 
-
-  # TODO: implement with ... and .list arguments
-  add <- function(value) {
-    # If value will throw an error, do it early.
-    force(value)
-
-    len <- length(q)
-    new_head <- head + 1L
-    if (new_head > len)
-      new_head <- new_head - len
-
-    if (new_head <= tail) {
-      # low_tail can be negative values up to zero, and is always less than new_head.
-      low_tail <- tail - len
+  add <- function(..., .list = NULL) {
+    if (is.null(.list)) {
+      # Fast path for common case
+      args <- list(...)
     } else {
-      # In this case, low_tail can be from 1 up to and including head
-      low_tail <- tail
+      args <- c(list(...), .list)
     }
 
-    # If head meets tail, need to grow.
-    if (new_head - low_tail >= len) {
-      .resize(ceiling(len*2))
+    n_args <- length(args)
 
-      # Set head and tail and add the item
-      tail <<- 1L
-      head <<- new_head - low_tail + 1L
-
-      # Need special workaround for NULL;
-      if (is.null(value)) q[head] <<- list(NULL)
-      else                q[[head]] <<- value
+    if (n_args == 0L) {
       return(invisible())
     }
 
-    # Didn't need to grow, but we wrapped around the list
-    if (new_head > len)
-      new_head <- new_head - len
+    capacity <- length(q)
+
+    # We're adding more items than can fit in `q`, so we need to grow it. This
+    # will also rearrange items so the tail is at 1 and the head is at n.
+    if (n + n_args > capacity) {
+      # Resize in powers of 2
+      doublings <- ceiling(log2((n + n_args) / capacity))
+      new_capacity <- capacity * 2 ^ doublings
+      .resize(new_capacity)
+      capacity <- new_capacity
+    }
+
+    # When we get here, we know we have enough capacity.
+
+    n_until_wrap <- capacity - head
+    if (n_until_wrap >= n_args) {
+      # Case 1: We don't need to wrap
+      q[head + seq_along(args)] <<- args
+      head <<- head + n_args
+
+    } else {
+      # Case 2: need to wrap around
+
+      # Fill in from head until end of `q`
+      if (n_until_wrap > 0) {
+        q[seq.int(head + 1, capacity)] <<- args[seq_len(n_until_wrap)]
+      }
+
+      # Now fill in beginning of q.
+      n_after_wrap <- n_args - n_until_wrap
+      q[seq_len(n_after_wrap)] <<- args[seq.int(n_until_wrap + 1, n_args)]
+
+      head <<- head + n_args - capacity
+    }
 
     # If tail was at zero, we had an empty queue, and need to set tail to 1
-    if (tail == 0L)
+    if (tail == 0L) {
       tail <<- 1L
+    }
 
-    head <<- new_head
-    q[head] <<- list(value)
+    n <<- n + n_args
+
     invisible()
   }
 
   remove <- function(missing = missing_default) {
-    if (tail == 0L)
+    if (n == 0L)
       return(missing)
 
-    len <- length(q)
+    capacity <- length(q)
     value <- q[[tail]]
     q[tail] <<- list(NULL)
     if (tail == head) {
@@ -75,21 +89,24 @@ queue <- function(init = 20, missing_default = NULL) {
       tail <<- tail + 1L
 
       # Wrapped around
-      if (tail > len)
-        tail <<- tail - len
+      if (tail > capacity)
+        tail <<- tail - capacity
     }
 
+    n <<- n - 1L
+
     # Shrink list if < 1/4 of the list is used, down to a minimum size of `init`
-    if (len > init && size() < len/4) {
-      .resize(max(init, ceiling(len/4)))
+    if (capacity > init && size() < capacity/4) {
+      .resize(max(init, ceiling(capacity/4)))
     }
 
     value
   }
 
   peek <- function(missing = missing_default) {
-    if (tail == 0L)
+    if (n == 0L) {
       return(missing)
+    }
 
     q[[tail]]
   }
@@ -99,20 +116,14 @@ queue <- function(init = 20, missing_default = NULL) {
   }
 
   reset <- function() {
-    q <<- vector("list", init)
+    q    <<- vector("list", init)
     head <<- 0L
     tail <<- 0L
+    n    <<- 0L
     invisible()
   }
 
   size <- function() {
-    if (head == 0L)
-      return(0L)
-
-    n <- head - tail + 1L
-    if (n < 1L)
-      n <- n + length(q)
-
     n
   }
 
@@ -120,7 +131,7 @@ queue <- function(init = 20, missing_default = NULL) {
   # removed (and oldest in the queue).
   # `.size` is the desired size of the output list. This is only for internal use.
   as_list <- function(.size = NULL) {
-    if (head == 0L)
+    if (n == 0L)
       return(list())
 
     if (is.null(.size)) {
@@ -129,38 +140,33 @@ queue <- function(init = 20, missing_default = NULL) {
       stop("Can't return list smaller than number of items.")
     }
 
-    len <- length(q)
+    capacity <- length(q)
 
     # low_tail can be negative values up to zero, and is always less than head.
     low_tail <- tail
     if (head < tail)
-      low_tail <- tail - len
+      low_tail <- tail - capacity
 
     # Get indices and transfer over old
     new_q <- vector("list", .size)
-    old_idx <- (seq(low_tail, head) - 1L) %% len + 1L
+    old_idx <- (seq(low_tail, head) - 1L) %% capacity + 1L
     new_q[seq_len(length(old_idx))] <- q[old_idx]
 
     new_q
   }
 
   .resize <- function(new_size) {
-    n <- size()
     if (new_size < n)
       stop("Can't shrink smaller than number of items (", size(), ").")
     if (new_size <= 0)
       stop("Can't shrink smaller than one.")
 
-    if (head == 0L) {
+    if (n == 0L) {
       q <<- vector("list", new_size)
       return(invisible())
     }
 
-    len <- length(q)
-
     q <<- as_list(new_size)
-
-    # Set head and tail and add the item
     tail <<- 1L
     head <<- n
     invisible()
