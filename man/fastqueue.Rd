@@ -21,19 +21,28 @@ backing list will grow or shrink as the queue changes in size.
 \code{fastqueue} objects have the following methods:
 
 \describe{
-\item{\code{add(..., .list = NULL)}}{
+\item{\code{add(x)}}{
+Add an object to the queue.
+}
+\item{\code{madd(..., .list = NULL)}}{
 Add objects to the queue. \code{.list} can be a list of objects to add.
 }
 \item{\code{remove(missing = missing_default)}}{
 Remove and return the next object in the queue, but do not remove it from
 the queue. If the queue is empty, this will return \code{missing}, which
 defaults to the value of \code{missing_default} that \code{queue()} was created
-with.
+with (typically, \code{NULL}).
+}
+\item{\code{remove(n, missing = missing_default)}}{
+Remove and return the next \code{n} objects on the queue, in a list. The first
+element of the list is the oldest object in the queue (in other words,
+the next item that would be returned by \code{remove()}). If \code{n} is greater
+than the number of objects in the queue, any requested items beyond
+those in the queue will be replaced with \code{missing} (typically, \code{NULL}).
 }
 \item{\code{peek(missing = missing_default)}}{
-Return the next object in the queue. If the queue is empty,
-it will return \code{missing}, which defaults to the value of
-\code{missing_default} that \code{queue()} was created with.
+Return the next object in the queue but do not remove it from the queue.
+If the queue is empty, this will return \code{missing}.
 }
 \item{\code{reset()}}{
 Reset the queue, clearing all items.
@@ -41,11 +50,11 @@ Reset the queue, clearing all items.
 \item{\code{size()}}{
 Returns the number of items in the queue.
 }
-\item{\code{as_list(sort = FALSE)}}{
+\item{\code{as_list()}}{
 Return a list containing the objects in the queue, where the first
 element in the list is oldest object in the queue (in other words, it is
-the next item that would exit the queue), and the last element in the
-list is the most recently added object.
+the next item that would be returned by \code{remove()}), and the last element
+in the list is the most recently added object.
 }
 }
 }

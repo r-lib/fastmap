@@ -6,19 +6,28 @@
 #' `fastqueue` objects have the following methods:
 #'
 #' \describe{
-#'   \item{\code{add(..., .list = NULL)}}{
+#'   \item{\code{add(x)}}{
+#'     Add an object to the queue.
+#'   }
+#'   \item{\code{madd(..., .list = NULL)}}{
 #'     Add objects to the queue. `.list` can be a list of objects to add.
 #'   }
 #'   \item{\code{remove(missing = missing_default)}}{
 #'     Remove and return the next object in the queue, but do not remove it from
 #'     the queue. If the queue is empty, this will return `missing`, which
 #'     defaults to the value of `missing_default` that `queue()` was created
-#'     with.
+#'     with (typically, `NULL`).
+#'   }
+#'   \item{\code{remove(n, missing = missing_default)}}{
+#'     Remove and return the next `n` objects on the queue, in a list. The first
+#'     element of the list is the oldest object in the queue (in other words,
+#'     the next item that would be returned by `remove()`). If `n` is greater
+#'     than the number of objects in the queue, any requested items beyond
+#'     those in the queue will be replaced with `missing` (typically, `NULL`).
 #'   }
 #'   \item{\code{peek(missing = missing_default)}}{
-#'     Return the next object in the queue. If the queue is empty,
-#'     it will return `missing`, which defaults to the value of
-#'     `missing_default` that `queue()` was created with.
+#'     Return the next object in the queue but do not remove it from the queue.
+#'     If the queue is empty, this will return `missing`.
 #'   }
 #'   \item{\code{reset()}}{
 #'     Reset the queue, clearing all items.
@@ -26,11 +35,11 @@
 #'   \item{\code{size()}}{
 #'     Returns the number of items in the queue.
 #'   }
-#'   \item{\code{as_list(sort = FALSE)}}{
+#'   \item{\code{as_list()}}{
 #'     Return a list containing the objects in the queue, where the first
 #'     element in the list is oldest object in the queue (in other words, it is
-#'     the next item that would exit the queue), and the last element in the
-#'     list is the most recently added object.
+#'     the next item that would be returned by `remove()`), and the last element
+#'     in the list is the most recently added object.
 #'   }
 #' }
 #'
@@ -43,12 +52,44 @@
 fastqueue <- function(init = 20, missing_default = NULL) {
   force(missing_default)
 
-  q    <- vector("list", init)
-  head <- 0L  # Index of most recently added item
-  tail <- 0L  # Index of oldest item (next to be removed)
-  n    <- 0L  # Number of items in queue
+  q     <- vector("list", init)
+  head  <- 0L  # Index of most recently added item
+  tail  <- 0L  # Index of oldest item (next to be removed)
+  count <- 0L  # Number of items in queue
 
-  add <- function(..., .list = NULL) {
+  add <- function(x) {
+    force(x)
+
+    capacity <- length(q)
+    if (count + 1L > capacity) {
+      capacity <- .resize_at_least(count + 1L)
+    }
+
+    if (capacity - head >= 1L) {
+      # Case 1: We don't need to wrap
+      head <<- head + 1L
+    } else {
+      # Case 2: need to wrap around
+      head <<- 1L
+    }
+
+    if (is.null(x)) {
+      q[head] <<- list(NULL)
+    } else {
+      q[[head]] <<- x
+    }
+
+    # If tail was at zero, we had an empty queue, and need to set tail to 1
+    if (tail == 0L) {
+      tail <<- 1L
+    }
+
+    count <<- count + 1L
+
+    invisible()
+  }
+
+  madd <- function(..., .list = NULL) {
     if (is.null(.list)) {
       # Fast path for common case
       args <- list(...)
@@ -63,18 +104,9 @@ fastqueue <- function(init = 20, missing_default = NULL) {
     }
 
     capacity <- length(q)
-
-    # We're adding more items than can fit in `q`, so we need to grow it. This
-    # will also rearrange items so the tail is at 1 and the head is at n.
-    if (n + n_args > capacity) {
-      # Resize in powers of 2
-      doublings <- ceiling(log2((n + n_args) / capacity))
-      new_capacity <- capacity * 2 ^ doublings
-      .resize(new_capacity)
-      capacity <- new_capacity
+    if (count + n_args > capacity) {
+      capacity <- .resize_at_least(count + n_args)
     }
-
-    # When we get here, we know we have enough capacity.
 
     n_until_wrap <- capacity - head
     if (n_until_wrap >= n_args) {
@@ -102,13 +134,13 @@ fastqueue <- function(init = 20, missing_default = NULL) {
       tail <<- 1L
     }
 
-    n <<- n + n_args
+    count <<- count + n_args
 
     invisible()
   }
 
   remove <- function(missing = missing_default) {
-    if (n == 0L)
+    if (count == 0L)
       return(missing)
 
     capacity <- length(q)
@@ -125,18 +157,105 @@ fastqueue <- function(init = 20, missing_default = NULL) {
         tail <<- tail - capacity
     }
 
-    n <<- n - 1L
+    count <<- count - 1L
 
-    # Shrink list if < 1/4 of the list is used, down to a minimum size of `init`
-    if (capacity > init && size() < capacity/4) {
-      .resize(max(init, ceiling(capacity/4)))
+    # Shrink list if <= 1/4 of the list is used, down to a minimum size of
+    # `init`. When we resize, make sure there's room to add items without having
+    # to resize again (that's why the +1 is there).
+    if (capacity > init && count <= capacity/4) {
+      .resize_at_least(count + 1L)
     }
 
     value
   }
 
+  mremove <- function(n, missing = missing_default) {
+    if (n < 1) {
+      stop("`n` must be at least 1.")
+    }
+
+    n <- as.integer(n)
+
+    capacity <- length(q)
+    values <- vector("list", n)
+
+    # When removing multiple, there are two variables to deal with:
+    #   (1) no wrap vs. (2) wrap
+    #   (A) n < count vs. (B) n == count vs. (C) n > count
+
+    # =====================================================================
+    # First run: Fill from tail until we hit n items, head, or end of list.
+    # =====================================================================
+    run_length <- min(n, capacity-tail+1L)
+    if (head >= tail) {
+      # In the case when the queue does NOT wrap around...
+      run_length <- min(run_length, head-tail+1L)
+    }
+    run_idxs <- seq.int(tail, tail + run_length - 1)
+    values[seq_len(run_length)] <- q[run_idxs]
+    q[run_idxs] <<- list(NULL)
+
+    # After first run, do some bookkeeping.
+    total_filled <-  run_length
+    remaining_n  <-  n     - run_length
+    count        <<- count - run_length
+    tail         <<- tail  + run_length
+
+    if (count == 0L) {
+      # We've emptied the queue
+      # TODO: Something more efficient than reset() - don't create a new list
+      reset()
+
+    } else if (tail > capacity) {
+      # We've wrapped around
+      stopifnot(tail == capacity + 1L) # Should alwoys land on one after capacity (debugging)
+      tail <<- 1L
+    }
+
+    # ==========================================================
+    # Second run: Continue filling until we hit n items or head.
+    # ==========================================================
+    if (remaining_n > 0 && count != 0 && tail <= head) {
+      stopifnot(tail == 1L) # Make sure we've actually wrapped
+      run_length <- min(remaining_n, head)
+      run_idxs <- seq_len(run_length)
+      values[seq.int(total_filled+1, total_filled+run_length)] <- q[run_idxs]
+      q[run_idxs] <<- list(NULL)
+
+      # Do more bookkeeping. TODO: functionize this part
+      total_filled <-  total_filled + run_length
+      remaining_n  <-  remaining_n  - run_length
+      count        <<- count        - run_length
+      tail         <<- tail         + run_length
+
+      if (count == 0L) {
+        # We've emptied the queue
+        stopifnot(tail == head + 1L) # Should land on one after head (debugging)
+        # TODO: Something more efficient than reset() - don't create a new list
+        reset()
+      }
+    }
+
+    # ===============================================================
+    # Third run: We've emptied the queue but still need to fill more.
+    # ===============================================================
+    if (remaining_n > 0) {
+      stopifnot(count == 0)
+      values[seq(total_filled+1, n)] <- list(missing)
+    }
+
+    # Shrink list if <= 1/4 of the list is used, down to a minimum size of
+    # `init`. When we resize, make sure there's room to add items without having
+    # to resize again (that's why the +1 is there).
+    if (capacity > init && count <= capacity/4) {
+      .resize_at_least(count + 1L)
+    }
+
+    values
+  }
+
   peek <- function(missing = missing_default) {
-    if (n == 0L) {
+    if (count == 0L) {
       return(missing)
     }
 
@@ -144,22 +263,22 @@ fastqueue <- function(init = 20, missing_default = NULL) {
   }
 
   reset <- function() {
-    q    <<- vector("list", init)
-    head <<- 0L
-    tail <<- 0L
-    n    <<- 0L
+    q     <<- vector("list", init)
+    head  <<- 0L
+    tail  <<- 0L
+    count <<- 0L
     invisible()
   }
 
   size <- function() {
-    n
+    count
   }
 
   # Return the entire queue as a list, where the first item is the next to be
   # removed (and oldest in the queue).
   # `.size` is the desired size of the output list. This is only for internal use.
   as_list <- function(.size = NULL) {
-    if (n == 0L)
+    if (count == 0L)
       return(list())
 
     if (is.null(.size)) {
@@ -183,27 +302,41 @@ fastqueue <- function(init = 20, missing_default = NULL) {
     new_q
   }
 
-  .resize <- function(new_size) {
-    if (new_size < n)
+  # Resize to a specific size. This will also rearrange items so the tail is at
+  # 1 and the head is at count.
+  .resize <- function(n) {
+    if (n < count)
       stop("Can't shrink smaller than number of items (", size(), ").")
-    if (new_size <= 0)
+    if (n <= 0)
       stop("Can't shrink smaller than one.")
 
-    if (n == 0L) {
-      q <<- vector("list", new_size)
-      return(invisible())
+    if (count == 0L) {
+      q <<- vector("list", n)
+      return(n)
     }
 
-    q <<- as_list(new_size)
+    q <<- as_list(n)
     tail <<- 1L
-    head <<- n
-    invisible()
+    head <<- count
+    n
+  }
+
+  # Resize the backing list to a size that's `init` times a power of 2, so that
+  # it's at least as large as `n`.
+  .resize_at_least <- function(n) {
+    doublings <- ceiling(log2(n / init))
+    doublings <- max(0, doublings)
+    new_capacity <- init * 2 ^ doublings
+    .resize(new_capacity)
+    # TODO: Don't actually resize if we're already at correct capacity
   }
 
 
   list(
     add     = add,
+    madd    = madd,
     remove  = remove,
+    mremove = mremove,
     peek    = peek,
     reset   = reset,
     size    = size,

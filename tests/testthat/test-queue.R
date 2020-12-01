@@ -1,7 +1,7 @@
 test_that("Basic operations", {
   q <- fastqueue(3)
   q$add(1)
-  q$add(2)
+  q$madd(2)
   q$add(3)
   expect_identical(q$as_list(), list(1,2,3))
   expect_identical(q$remove(), 1)
@@ -37,9 +37,9 @@ test_that("Adding NULL to a queue", {
   expect_identical(q$as_list(), list(NULL))
 
   # Do some other weird combinations of adding NULL
-  q$add(NULL, NULL)
-  q$add(.list = list(NULL))
-  q$add(NULL, .list = list(NULL, NULL))
+  q$madd(NULL, NULL)
+  q$madd(.list = list(NULL))
+  q$madd(NULL, .list = list(NULL, NULL))
 
   expect_identical(q$as_list(), list(NULL, NULL, NULL, NULL, NULL, NULL, NULL))
   expect_identical(q$remove(missing = "foo"), NULL)
@@ -76,39 +76,39 @@ test_that("Different values when removing from an empty queue", {
 
 test_that("Adding multiple items", {
   q <- fastqueue(3)
-  q$add(1, .list = list(3), 2)
+  q$madd(1, .list = list(3), 2)
   expect_identical(env(q)$q, list(1,2,3))
   expect_identical(q$as_list(), list(1,2,3))
 
   # Should cause two doublings, to capacity of 12
-  q$add(4,5,6,7)
+  q$madd(4,5,6,7)
   expect_identical(env(q)$q, list(1,2,3,4,5,6,7,NULL,NULL,NULL,NULL,NULL))
   expect_identical(q$as_list(), list(1,2,3,4,5,6,7))
 
-  q$add(8,9)
+  q$madd(8,9)
   for (i in 1:5) q$remove()
   # Wrapping around
-  q$add(10,11,12,13,14,15,16)
+  q$madd(10,11,12,13,14,15,16)
   expect_identical(q$as_list(), as.list(as.numeric(6:16)))
   expect_identical(env(q)$q, list(13,14,15,16,NULL,6,7,8,9,10,11,12))
 
 
   q <- fastqueue(3)
   # Should double to size 6
-  q$add(1,2,3,4,5,6)
+  q$madd(1,2,3,4,5,6)
   expect_identical(q$as_list(), list(1,2,3,4,5,6))
   expect_identical(q$remove(), 1)
-  q$add(7,8,9,10,11,12,13,14)
+  q$madd(7,8,9,10,11,12,13,14)
   expect_equal(length(env(q)$q), 24)
   expect_identical(q$as_list(), as.list(as.numeric(2:14)))
   expect_identical(env(q)$q[1:13], as.list(as.numeric(2:14)))
-  for (i in 1:7) q$remove()
+  for (i in 1:6) q$remove()
   expect_equal(length(env(q)$q), 24)
-  expect_identical(q$as_list(), as.list(as.numeric(9:14)))
+  expect_identical(q$as_list(), as.list(as.numeric(8:14)))
 
-  # This should cause a shrink because we passed the 1/4 threshold
-  expect_identical(q$remove(), 9)
-  expect_identical(env(q)$q, list(10,11,12,13,14,NULL))
+  # This should cause a shrink to size 12 because we hit the 1/4 threshold.
+  expect_identical(q$remove(), 8)
+  expect_identical(env(q)$q, list(9,10,11,12,13,14,NULL,NULL,NULL,NULL,NULL,NULL))
 })
 
 
@@ -192,7 +192,7 @@ test_that("Error expressions don't result in inconsistent state", {
   q$add(1)
   expect_error(q$add(stop("2")))
   q$add(3)
-  expect_error(q$add(stop("4")))
+  expect_error(q$madd(stop("4")))
   expect_identical(q$size(), 2L)
   expect_identical(q$peek(), 1)
   expect_identical(env(q)$q, list(1,3,NULL,NULL))
@@ -259,4 +259,79 @@ test_that("Random walk test", {
   expect_identical(q$as_list(), list())
   # Should be back to original internal state: a list of 20 NULLs
   expect_identical(env(q)$q, lapply(1:20, function(x) NULL))
+})
+
+
+test_that(".resize_at_least() works", {
+  q <- fastqueue(3)
+  n <- 1:25
+  names(n) <- n
+
+  # When calling .ensure_capacity for each vakye of n, the resulting size should
+  # be enough to fit it, and go up by doubling.
+  capacities <- vapply(n, function(x) {
+    env(q)$.resize_at_least(x)
+    length(env(q)$q)
+  }, numeric(1))
+
+  expected <- c(
+     `1` = 3,   `2` =  3,  `3` =  3,
+     `4` =  6,  `5` =  6,  `6` =  6,
+     `7` = 12,  `8` = 12,  `9` = 12, `10` = 12, `11` = 12, `12` = 12,
+    `13` = 24, `14` = 24, `15` = 24, `16` = 24, `17` = 24, `18` = 24,
+    `19` = 24, `20` = 24, `21` = 24, `22` = 24, `23` = 24, `24` = 24,
+    `25` = 48
+  )
+
+  expect_identical(capacities, expected)
+})
+
+
+test_that("mremove()", {
+  # Case 1A and 1B
+  q <- fastqueue(5)
+  q$madd(1,2,3,4,5)
+  expect_identical(q$mremove(1), list(1))
+  expect_identical(q$mremove(4), list(2,3,4,5))
+  expect_identical(env(q)$q, vector("list", 5))
+  expect_identical(q$size(), 0L)
+
+  # Case 1A and 1B, but removing exactly one item in last mremove
+  q <- fastqueue(5)
+  q$madd(1,2,3,4,5)
+  expect_identical(q$mremove(4), list(1,2,3,4))
+  expect_identical(q$mremove(1), list(5))
+  expect_identical(env(q)$q, vector("list", 5))
+  expect_identical(q$size(), 0L)
+
+  # Wrap around
+  q <- fastqueue(5)
+  q$madd(1,2,3,4,5)
+  expect_identical(q$mremove(1), list(1))
+  q$madd(6)
+  expect_identical(q$as_list(), list(2,3,4,5,6))
+  expect_identical(env(q)$q, list(6,2,3,4,5))
+
+  expect_identical(q$mremove(4), list(2,3,4,5))
+  expect_identical(env(q)$q, list(6,NULL,NULL,NULL,NULL))
+  expect_identical(q$size(), 1L)
+  expect_identical(q$mremove(3, missing = -1), list(6, -1, -1))
+
+  q <- fastqueue(5)
+  q$madd(1,2,3,4,5)
+  q$remove()
+  q$add(6)
+  expect_identical(q$mremove(5), list(2,3,4,5,6))
+
+  q <- fastqueue(5, missing_default = -1)
+  q$madd(1,2,3,4,5)
+  q$remove()
+  q$add(6)
+  expect_identical(q$mremove(6), list(2,3,4,5,6,-1))
+
+  q <- fastqueue(5, missing_default = -1)
+  q$madd(1,2,3,4,5)
+  q$mremove(2)
+  q$madd(6,7)
+  expect_identical(q$mremove(6), list(3,4,5,6,7,-1))
 })
