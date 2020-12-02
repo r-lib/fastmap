@@ -203,8 +203,8 @@ fastqueue <- function(init = 20, missing_default = NULL) {
 
     if (count == 0L) {
       # We've emptied the queue
-      # TODO: Something more efficient than reset() - don't create a new list
-      reset()
+      head <<- 0L
+      tail <<- 0L
 
     } else if (tail > capacity) {
       # We've wrapped around
@@ -231,8 +231,8 @@ fastqueue <- function(init = 20, missing_default = NULL) {
       if (count == 0L) {
         # We've emptied the queue
         stopifnot(tail == head + 1L) # Should land on one after head (debugging)
-        # TODO: Something more efficient than reset() - don't create a new list
-        reset()
+        head <<- 0L
+        tail <<- 0L
       }
     }
 
@@ -276,14 +276,17 @@ fastqueue <- function(init = 20, missing_default = NULL) {
 
   # Return the entire queue as a list, where the first item is the next to be
   # removed (and oldest in the queue).
-  # `.size` is the desired size of the output list. This is only for internal use.
-  as_list <- function(.size = NULL) {
+  as_list <- function() {
     if (count == 0L)
       return(list())
 
-    if (is.null(.size)) {
-      .size <- size()
-    } else if (.size < size()) {
+    .as_list()
+  }
+
+  # Internal version of as_list()
+  # `.size` is the desired size of the output list.
+  .as_list <- function(.size = count) {
+    if (.size < count) {
       stop("Can't return list smaller than number of items.")
     }
 
@@ -305,17 +308,24 @@ fastqueue <- function(init = 20, missing_default = NULL) {
   # Resize to a specific size. This will also rearrange items so the tail is at
   # 1 and the head is at count.
   .resize <- function(n) {
-    if (n < count)
-      stop("Can't shrink smaller than number of items (", size(), ").")
-    if (n <= 0)
+    if (n < count) {
+      stop("Can't shrink smaller than number of items (", count, ").")
+    }
+    if (n <= 0) {
       stop("Can't shrink smaller than one.")
+    }
+
+    # If q is already the right size, don't need to do anything.
+    if (length(q) == n) {
+      return(n)
+    }
 
     if (count == 0L) {
       q <<- vector("list", n)
       return(n)
     }
 
-    q <<- as_list(n)
+    q    <<- .as_list(n)
     tail <<- 1L
     head <<- count
     n
@@ -328,7 +338,6 @@ fastqueue <- function(init = 20, missing_default = NULL) {
     doublings <- max(0, doublings)
     new_capacity <- init * 2 ^ doublings
     .resize(new_capacity)
-    # TODO: Don't actually resize if we're already at correct capacity
   }
 
 
