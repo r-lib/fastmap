@@ -1,3 +1,8 @@
+fastmap 1.0.1.9000
+=============
+
+* Added `faststack()` and `fastqueue()`. (#15)
+
 fastmap 1.0.1
 =============
 

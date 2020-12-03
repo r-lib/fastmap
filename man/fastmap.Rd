@@ -39,55 +39,55 @@ the keys to the native encoding, and the keys will be correctly converted to
 UTF-8. With \code{$mget()}, the keys will be converted to UTF-8 before they
 are fetched.
 
-Fastmap objects have the following methods:
+\code{fastmap} objects have the following methods:
 
 \describe{
-  \item{\code{set(key, value)}}{
-    Set a key-value pair. \code{key} must be a string. Returns \code{value}.
-  }
-  \item{\code{mset(..., .list = NULL)}}{
-    Set multiple key-value pairs. The key-value pairs are named arguments,
-    and/or a list passed in as \code{.list}. Returns a named list where the
-    names are the keys, and the values are the values.
-  }
-  \item{\code{get(key, missing = missing_default)}}{
-    Get a value corresponding to \code{key}. If the key is not in the map,
-    return \code{missing}.
-  }
-  \item{\code{mget(keys, missing = missing_default)}}{
-    Get values corresponding to \code{keys}, which is a character vector. The
-    values will be returned in a named list where the names are the same as
-    the \code{keys} passed in, in the same order. For keys not in the map,
-    they will have \code{missing} for their value.
-  }
-  \item{\code{has(keys)}}{
-    Given a vector of keys, returns a logical vector reporting whether each
-    key is contained in the map.
-  }
-  \item{\code{remove(keys)}}{
-    Given a vector of keys, remove the key-value pairs from the map. Returns
-    a logical vector reporting whether each item existed in (and was removed
-    from) the map.
-  }
-  \item{\code{keys(sort = FALSE)}}{
-    Returns a character vector of all the keys. By default, the keys will be
-    in arbitrary order. Note that the order can vary across platforms and is
-    not guaranteed to be consistent. With \code{sort=TRUE}, the keys will be
-    sorted according to their Unicode code point values.
-  }
-  \item{\code{size()}}{
-    Returns the number of items in the map.
-  }
-  \item{\code{as_list(sort = FALSE)}}{
-    Return a named list where the names are the keys from the map, and the
-    values are the values. By default, the keys will be in arbitrary order.
-    Note that the order can vary across platforms and is not guaranteed to
-    be consistent. With \code{sort=TRUE}, the keys will be sorted according
-    to their Unicode code point values.
-  }
-  \item{\code{reset()}}{
-    Reset the fastmap object, clearing all items.
-  }
+\item{\code{set(key, value)}}{
+Set a key-value pair. \code{key} must be a string. Returns \code{value}.
+}
+\item{\code{mset(..., .list = NULL)}}{
+Set multiple key-value pairs. The key-value pairs are named arguments,
+and/or a list passed in as \code{.list}. Returns a named list where the
+names are the keys, and the values are the values.
+}
+\item{\code{get(key, missing = missing_default)}}{
+Get a value corresponding to \code{key}. If the key is not in the map,
+return \code{missing}.
+}
+\item{\code{mget(keys, missing = missing_default)}}{
+Get values corresponding to \code{keys}, which is a character vector. The
+values will be returned in a named list where the names are the same as
+the \code{keys} passed in, in the same order. For keys not in the map,
+they will have \code{missing} for their value.
+}
+\item{\code{has(keys)}}{
+Given a vector of keys, returns a logical vector reporting whether each
+key is contained in the map.
+}
+\item{\code{remove(keys)}}{
+Given a vector of keys, remove the key-value pairs from the map. Returns
+a logical vector reporting whether each item existed in (and was removed
+from) the map.
+}
+\item{\code{keys(sort = FALSE)}}{
+Returns a character vector of all the keys. By default, the keys will be
+in arbitrary order. Note that the order can vary across platforms and is
+not guaranteed to be consistent. With \code{sort=TRUE}, the keys will be
+sorted according to their Unicode code point values.
+}
+\item{\code{size()}}{
+Returns the number of items in the map.
+}
+\item{\code{as_list(sort = FALSE)}}{
+Return a named list where the names are the keys from the map, and the
+values are the values. By default, the keys will be in arbitrary order.
+Note that the order can vary across platforms and is not guaranteed to
+be consistent. With \code{sort=TRUE}, the keys will be sorted according
+to their Unicode code point values.
+}
+\item{\code{reset()}}{
+Reset the fastmap object, clearing all items.
+}
 }
 }
 \examples{

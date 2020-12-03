@@ -1,4 +1,5 @@
-# Given a fastmap object, return the enclosing environment of its methods.
-get_self <- function(m) {
-  environment(m$set)
+# Get the environment from a fastmap/fastqueue/faststack object, so we can
+# access internal objects.
+env <- function(x) {
+  environment(x$as_list)
 }

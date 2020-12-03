@@ -13,7 +13,7 @@ test_that("General correctness", {
   expect_true(m$has("foo"))
   expect_false(m$has("bar"))
   expect_identical(m$size(), 2L)
-  expect_identical(m$size(), length(get_self(m)$values) - get_self(m)$n_holes)
+  expect_identical(m$size(), length(env(m)$values) - env(m)$n_holes)
 
   # Removal
   expect_true(m$remove("asdf"))
@@ -26,7 +26,7 @@ test_that("General correctness", {
   expect_true(m$has("foo"))
   expect_false(m$has("bar"))
   expect_identical(m$size(), 1L)
-  expect_identical(m$size(), length(get_self(m)$values) - get_self(m)$n_holes)
+  expect_identical(m$size(), length(env(m)$values) - env(m)$n_holes)
   # Removing non-existent key has no effect
   expect_false(m$remove("asdf"))
   expect_equal(m$get("asdf"), NULL)
@@ -42,7 +42,7 @@ test_that("General correctness", {
   expect_true(m$has("foo"))
   expect_false(m$has("bar"))
   expect_identical(m$size(), 2L)
-  expect_identical(m$size(), length(get_self(m)$values) - get_self(m)$n_holes)
+  expect_identical(m$size(), length(env(m)$values) - env(m)$n_holes)
 
 
   # Replacing existing object
@@ -56,7 +56,7 @@ test_that("General correctness", {
   expect_true(m$has("foo"))
   expect_false(m$has("bar"))
   expect_identical(m$size(), 2L)
-  expect_identical(m$size(), length(get_self(m)$values) - get_self(m)$n_holes)
+  expect_identical(m$size(), length(env(m)$values) - env(m)$n_holes)
 
   # NULL handling
   m$set("asdf", NULL)
