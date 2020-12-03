@@ -6,9 +6,13 @@ fastmap
 [![R build status](https://github.com/r-lib/fastmap/workflows/R-CMD-check/badge.svg)](https://github.com/r-lib/fastmap/actions)
 <!-- badges: end -->
 
-**fastmap** is a package that implements _maps_ -- that is, key-value stores -- in R.
+**fastmap** implements the following data structures for R:
 
-The usual way of doing this in R is to use environments. However, this method is problematic when using a large set of keys or randomly-generated keys, because each time you use a key or even check for the existence of a key using `exists()`, that key is interned as a symbol and stored in the R symbol table, which is never garbage-collected. This means that every time you use a new key -- whether it is to store an object or just check whether the key exists in the environment, R leaks a little memory. If you have a relatively small, fixed set of keys, or if your R process is a short-running process, this may not be a problem. But if, for example, you have a long-running R process that uses random keys, then the memory leakage can cause a noticeable increase in memory usage. Also, when R's symbol table is large, garbage collection events, which occur regularly, take more time, reducing R's performance in general. (See the _Memory leak examples_ section of this document for more information.)
+* `fastmap`: maps (key-value store)
+* `faststack`: stacks
+* `fastqueue`: queues
+
+The usual way of implementing maps in R is to use environments. However, this method is problematic when using a large set of keys or randomly-generated keys, because each time you use a key or even check for the existence of a key using `exists()`, that key is interned as a symbol and stored in the R symbol table, which is never garbage-collected. This means that every time you use a new key -- whether it is to store an object or just check whether the key exists in the environment, R leaks a little memory. If you have a relatively small, fixed set of keys, or if your R process is a short-running process, this may not be a problem. But if, for example, you have a long-running R process that uses random keys, then the memory leakage can cause a noticeable increase in memory usage. Also, when R's symbol table is large, garbage collection events, which occur regularly, take more time, reducing R's performance in general. (See the _Memory leak examples_ section of this document for more information.)
 
 **fastmap** solves this problem by storing the keys as C++ `std::string` objects, and so it does not use the R symbol table at all. The values are stored in a list so that R knows not to garbage-collect them. In C++, fastmap uses a [`tsl::hopscotch_map`](https://github.com/Tessil/hopscotch-map/) (which is similar to `std::unordered_map`) to map from the keys to indices in the list of values.
 
@@ -20,6 +24,8 @@ install.packages("fastmap")
 
 
 ## Usage
+
+### `fastmap()`
 
 ```R
 library(fastmap)
@@ -91,8 +97,104 @@ m$get("x")
 #> <Key Missing>
 ```
 
+### `faststack()`
 
-## Notes
+```R
+s <- faststack()
+s$push(10)
+s$mpush(11, 12, 13)
+s$mpush(.list = list(14, 15))
+
+s$pop()
+#> [1] 15
+
+str(s$mpop(3))
+#> List of 3
+#>  $ : num 14
+#>  $ : num 13
+#>  $ : num 12
+
+s$peek()
+#> [1] 11
+
+s$size()
+#> [1] 2
+
+# Get the stack in list form. Note that the order is the opposite of $mpop()
+str(s$as_list())
+#> List of 2
+#>  $ : num 10
+#>  $ : num 11
+
+s$reset()
+```
+
+By default, popping from an empty stack returns `NULL`, but you can specify other values.
+
+```R
+s$pop()
+#> NULL
+
+# Can specify the default missing value at creation.
+s <- faststack(missing_default = key_missing())
+s$pop()
+#> <Key Missing>
+
+# Can specify a missing value when $pop is called
+s$pop(missing = "nope")
+#> [1] "nope"
+```
+
+### `fastqueue()`
+
+```R
+q <- fastqueue()
+q$add(10)
+q$madd(11, 12, 13)
+q$madd(.list = list(14, 15))
+
+q$remove()
+#> [1] 10
+
+str(q$mremove(3))
+#> List of 3
+#>  $ : num 11
+#>  $ : num 12
+#>  $ : num 13
+
+q$peek()
+#> [1] 14
+
+q$size()
+#> [1] 2
+
+# Get the queue in list form.
+str(q$as_list())
+#> List of 2
+#>  $ : num 14
+#>  $ : num 15
+
+q$reset()
+```
+
+By default, removing from an empty queue returns `NULL`, but you can specify other values.
+
+```R
+q$remove()
+#> NULL
+
+# Can specify the default missing value at creation.
+q <- fastqueue(missing_default = key_missing())
+q$remove()
+#> <Key Missing>
+
+# Can specify a missing value when $pop is called
+q$remove(missing = "nope")
+#> [1] "nope"
+```
+
+
+## Notes on `fastmap` objects
 
 ### Key ordering
 
@@ -102,7 +204,7 @@ If you want to guarantee a particular order, you can call `m$keys(sort=TRUE)` or
 
 ### Serialization
 
-A fastmap object can be serialized (or saved) in one R session and deserialized (or loaded) in another. For performance, the data structure that tracks the mapping between keys and values is implemented in C++, and this data structure will not be serialized, but fastmap also keeps a copy of the same information in an ordinary R vector, which will be serialized. After a fastmap object is deserialized, the C++ data structure will not exist, but the first time any method on the fastmap is called, the C++ data structure will be rebuilt using information from the R vector.
+A `fastmap` object can be serialized (or saved) in one R session and deserialized (or loaded) in another. For performance, the data structure that tracks the mapping between keys and values is implemented in C++, and this data structure will not be serialized, but fastmap also keeps a copy of the same information in an ordinary R vector, which will be serialized. After a fastmap object is deserialized, the C++ data structure will not exist, but the first time any method on the fastmap is called, the C++ data structure will be rebuilt using information from the R vector.
 
 The vector is much slower for lookups, and so it is used only for restoring the C++ data structure after a fastmap object is deserialized or loaded.
 
