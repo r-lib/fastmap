@@ -1,6 +1,6 @@
 Package: fastmap
 Title: Fast Data Structures
-Version: 1.0.1.9001
+Version: 1.1.0
 Authors@R: c(
     person("Winston", "Chang", email = "winston@rstudio.com", role = c("aut", "cre")),
     person(given = "RStudio", role = c("cph", "fnd")),
