@@ -113,9 +113,12 @@ faststack <- function(init = 20, missing_default = NULL) {
   }
 
   mpop <- function(n, missing = missing_default) {
+    n <- as.integer(n)
+
     if (n < 1) {
       stop("`n` must be at least 1.")
     }
+
     if (n > count) {
       n_pop <- count
       n_extra <- n - count
@@ -137,7 +140,7 @@ faststack <- function(init = 20, missing_default = NULL) {
     }
 
     s[idx] <<- list(NULL)
-    count <<- count - as.integer(n_pop)
+    count <<- count - n_pop
 
     # Shrink list if < 1/2 of the list is used, down to a minimum size of `init`
     len <- length(s)

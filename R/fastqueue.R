@@ -170,11 +170,11 @@ fastqueue <- function(init = 20, missing_default = NULL) {
   }
 
   mremove <- function(n, missing = missing_default) {
+    n <- as.integer(n)
+
     if (n < 1) {
       stop("`n` must be at least 1.")
     }
-
-    n <- as.integer(n)
 
     capacity <- length(q)
     values <- vector("list", n)
