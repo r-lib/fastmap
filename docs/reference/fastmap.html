@@ -46,6 +46,8 @@ the values are any R objects." />
 
 
 
+
+
 <!-- mathjax -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script>
@@ -73,19 +75,13 @@ the values are any R objects." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fastmap</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
-<li>
   <a href="../reference/index.html">Reference</a>
 </li>
 <li>
@@ -95,7 +91,7 @@ the values are any R objects." />
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/r-lib/fastmap/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -156,34 +152,34 @@ process. However, if you use <code>$mset(.list = x)</code>, then R will not conv
 the keys to the native encoding, and the keys will be correctly converted to
 UTF-8. With <code>$mget()</code>, the keys will be converted to UTF-8 before they
 are fetched.</p>
-<p>Fastmap objects have the following methods:</p>
+<p><code>fastmap</code> objects have the following methods:</p>
 <dl>
-  <dt><code>set(key, value)</code></dt><dd><p>Set a key-value pair. <code>key</code> must be a string. Returns <code>value</code>.</p></dd>
-  <dt><code>mset(..., .list = NULL)</code></dt><dd><p>Set multiple key-value pairs. The key-value pairs are named arguments,
-    and/or a list passed in as <code>.list</code>. Returns a named list where the
-    names are the keys, and the values are the values.</p></dd>
-  <dt><code><a href='https://rdrr.io/r/base/get.html'>get(key, missing = missing_default)</a></code></dt><dd><p>Get a value corresponding to <code>key</code>. If the key is not in the map,
-    return <code>missing</code>.</p></dd>
-  <dt><code><a href='https://rdrr.io/r/base/get.html'>mget(keys, missing = missing_default)</a></code></dt><dd><p>Get values corresponding to <code>keys</code>, which is a character vector. The
-    values will be returned in a named list where the names are the same as
-    the <code>keys</code> passed in, in the same order. For keys not in the map,
-    they will have <code>missing</code> for their value.</p></dd>
-  <dt><code>has(keys)</code></dt><dd><p>Given a vector of keys, returns a logical vector reporting whether each
-    key is contained in the map.</p></dd>
-  <dt><code><a href='https://rdrr.io/r/base/rm.html'>remove(keys)</a></code></dt><dd><p>Given a vector of keys, remove the key-value pairs from the map. Returns
-    a logical vector reporting whether each item existed in (and was removed
-    from) the map.</p></dd>
-  <dt><code>keys(sort = FALSE)</code></dt><dd><p>Returns a character vector of all the keys. By default, the keys will be
-    in arbitrary order. Note that the order can vary across platforms and is
-    not guaranteed to be consistent. With <code>sort=TRUE</code>, the keys will be
-    sorted according to their Unicode code point values.</p></dd>
-  <dt><code>size()</code></dt><dd><p>Returns the number of items in the map.</p></dd>
-  <dt><code>as_list(sort = FALSE)</code></dt><dd><p>Return a named list where the names are the keys from the map, and the
-    values are the values. By default, the keys will be in arbitrary order.
-    Note that the order can vary across platforms and is not guaranteed to
-    be consistent. With <code>sort=TRUE</code>, the keys will be sorted according
-    to their Unicode code point values.</p></dd>
-  <dt><code>reset()</code></dt><dd><p>Reset the fastmap object, clearing all items.</p></dd>
+<dt><code>set(key, value)</code></dt><dd><p>Set a key-value pair. <code>key</code> must be a string. Returns <code>value</code>.</p></dd>
+<dt><code>mset(..., .list = NULL)</code></dt><dd><p>Set multiple key-value pairs. The key-value pairs are named arguments,
+and/or a list passed in as <code>.list</code>. Returns a named list where the
+names are the keys, and the values are the values.</p></dd>
+<dt><code><a href='https://rdrr.io/r/base/get.html'>get(key, missing = missing_default)</a></code></dt><dd><p>Get a value corresponding to <code>key</code>. If the key is not in the map,
+return <code>missing</code>.</p></dd>
+<dt><code><a href='https://rdrr.io/r/base/get.html'>mget(keys, missing = missing_default)</a></code></dt><dd><p>Get values corresponding to <code>keys</code>, which is a character vector. The
+values will be returned in a named list where the names are the same as
+the <code>keys</code> passed in, in the same order. For keys not in the map,
+they will have <code>missing</code> for their value.</p></dd>
+<dt><code>has(keys)</code></dt><dd><p>Given a vector of keys, returns a logical vector reporting whether each
+key is contained in the map.</p></dd>
+<dt><code><a href='https://rdrr.io/r/base/rm.html'>remove(keys)</a></code></dt><dd><p>Given a vector of keys, remove the key-value pairs from the map. Returns
+a logical vector reporting whether each item existed in (and was removed
+from) the map.</p></dd>
+<dt><code>keys(sort = FALSE)</code></dt><dd><p>Returns a character vector of all the keys. By default, the keys will be
+in arbitrary order. Note that the order can vary across platforms and is
+not guaranteed to be consistent. With <code>sort=TRUE</code>, the keys will be
+sorted according to their Unicode code point values.</p></dd>
+<dt><code>size()</code></dt><dd><p>Returns the number of items in the map.</p></dd>
+<dt><code>as_list(sort = FALSE)</code></dt><dd><p>Return a named list where the names are the keys from the map, and the
+values are the values. By default, the keys will be in arbitrary order.
+Note that the order can vary across platforms and is not guaranteed to
+be consistent. With <code>sort=TRUE</code>, the keys will be sorted according
+to their Unicode code point values.</p></dd>
+<dt><code>reset()</code></dt><dd><p>Reset the fastmap object, clearing all items.</p></dd>
 
 </dl>
 
@@ -259,7 +255,7 @@ are fetched.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.9000.</p>
 </div>
 
       </footer>

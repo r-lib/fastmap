@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>A missing key object — key_missing • fastmap</title>
+<title>Create a stack — faststack • fastmap</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,9 @@
 
 
 
-<meta property="og:title" content="A missing key object — key_missing" />
-<meta property="og:description" content="A key_missing object represents a missing key." />
+<meta property="og:title" content="Create a stack — faststack" />
+<meta property="og:description" content="A faststack is backed by a list. The backing list will grow or shrink as
+the stack changes in size." />
 
 
 
@@ -107,27 +108,55 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>A missing key object</h1>
-    <small class="dont-index">Source: <a href='https://github.com/r-lib/fastmap/blob/master/R/key_missing.R'><code>R/key_missing.R</code></a></small>
-    <div class="hidden name"><code>key_missing.Rd</code></div>
+    <h1>Create a stack</h1>
+    <small class="dont-index">Source: <a href='https://github.com/r-lib/fastmap/blob/master/R/faststack.R'><code>R/faststack.R</code></a></small>
+    <div class="hidden name"><code>faststack.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>A <code>key_missing</code> object represents a missing key.</p>
+    <p>A <code>faststack</code> is backed by a list. The backing list will grow or shrink as
+the stack changes in size.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>key_missing</span><span class='op'>(</span><span class='op'>)</span>
-
-<span class='fu'>is.key_missing</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>faststack</span><span class='op'>(</span>init <span class='op'>=</span> <span class='fl'>20</span>, missing_default <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x</th>
-      <td><p>An object to test.</p></td>
+      <th>init</th>
+      <td><p>Initial size of the list that backs the stack. This is also used
+as the minimum size of the list; it will not shrink any smaller.</p></td>
+    </tr>
+    <tr>
+      <th>missing_default</th>
+      <td><p>The value to return when <code>pop()</code> or <code>peek()</code> are
+called when the stack is empty. Default is <code>NULL</code>.</p></td>
     </tr>
     </table>
+
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p><code>faststack</code> objects have the following methods:</p>
+<dl>
+<dt><code>push(x)</code></dt><dd><p>Push an object onto the stack.</p></dd>
+<dt><code>mpush(..., .list = NULL)</code></dt><dd><p>Push objects onto the stack. <code>.list</code> can be a list of objects to add.</p></dd>
+<dt><code>pop(missing = missing_default)</code></dt><dd><p>Remove and return the top object on the stack. If the stack is empty,
+it will return <code>missing</code>, which defaults to the value of
+<code>missing_default</code> that <code><a href='https://rdrr.io/r/utils/stack.html'>stack()</a></code> was created with (typically, <code>NULL</code>).</p></dd>
+<dt><code>mpop(n, missing = missing_default)</code></dt><dd><p>Remove and return the top <code>n</code> objects on the stack, in a list. The first
+element of the list is the top object in the stack. If <code>n</code> is greater
+than the number of objects in the stack, any requested items beyond
+those in the stack will be replaced with <code>missing</code> (typically, <code>NULL</code>).</p></dd>
+<dt><code>peek(missing = missing_default)</code></dt><dd><p>Return the top object on the stack, but do not remove it from the stack.
+If the stack is empty, this will return <code>missing</code>.</p></dd>
+<dt><code>reset()</code></dt><dd><p>Reset the stack, clearing all items.</p></dd>
+<dt><code>size()</code></dt><dd><p>Returns the number of items in the stack.</p></dd>
+<dt><code>as_list()</code></dt><dd><p>Return a list containing the objects in the stack, where the first
+element in the list is the object at the bottom of the stack, and the
+last element in the list is the object at the top of the stack.</p></dd>
+
+</dl>
 
 
   </div>
