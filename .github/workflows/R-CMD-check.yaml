@@ -67,7 +67,7 @@ jobs:
           restore-keys: ${{ runner.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-
 
       - name: Test newline printing
-        run: Rscript -e 'for (i in 1:10) { cat("\rThis is message ", i, "/10", sep = "", file = stderr());  Sys.sleep(0.2) }'
+        run: Rscript -e 'for (i in 1:10) { cat("\\rThis is message ", i, "/10", sep = "", file = stderr());  Sys.sleep(0.2) }'
 
 
       - name: Install system dependencies
