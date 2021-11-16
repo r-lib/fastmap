@@ -3,7 +3,7 @@ fastmap
 
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/fastmap)](https://cran.r-project.org/package=fastmap)
-[![R build status](https://github.com/r-lib/fastmap/workflows/R-CMD-check/badge.svg)](https://github.com/r-lib/fastmap/actions)
+[![R build status](https://github.com/r-lib/fastmap/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/r-lib/fastmap/actions)
 <!-- badges: end -->
 
 **fastmap** implements the following data structures for R:
@@ -46,7 +46,7 @@ m$get("numbers")
 m$mget(c("letters", "numbers"))
 #> $letters
 #> [1] "a" "b" "c"
-#> 
+#>
 #> $numbers
 #> [1] 10 20 30
 
@@ -349,8 +349,8 @@ get_symbols <- inline::cfunction(
         }
       }
     }
-  
-  
+
+
     SEXP result = PROTECT(Rf_allocVector(STRSXP, symbol_count));
     symbol_count = 0;
     for (j = 0; j < HSIZE; j++) {
@@ -361,7 +361,7 @@ get_symbols <- inline::cfunction(
         }
       }
     }
-  
+
     UNPROTECT(1);
     return result;
   "
