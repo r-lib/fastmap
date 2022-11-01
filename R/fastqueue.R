@@ -18,7 +18,7 @@
 #'     defaults to the value of `missing_default` that `queue()` was created
 #'     with (typically, `NULL`).
 #'   }
-#'   \item{\code{remove(n, missing = missing_default)}}{
+#'   \item{\code{mremove(n, missing = missing_default)}}{
 #'     Remove and return the next `n` objects on the queue, in a list. The first
 #'     element of the list is the oldest object in the queue (in other words,
 #'     the next item that would be returned by `remove()`). If `n` is greater
