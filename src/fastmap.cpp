@@ -107,6 +107,16 @@ extern "C" {
   }
 
 
+  SEXP C_map_has(SEXP map_xptr, SEXP key_r) {
+    std::string key = key_from_sexp(key_r);
+
+    si_map* map = map_from_xptr(map_xptr);
+
+    bool found = map->contains(key);
+    return Rf_ScalarLogical(found);
+  }
+
+
   SEXP C_map_remove(SEXP map_xptr, SEXP key_r) {
     std::string key = key_from_sexp(key_r);
 
