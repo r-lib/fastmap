@@ -1,7 +1,7 @@
 /**
  * MIT License
  * 
- * Copyright (c) 2018 Tessil
+ * Copyright (c) 2018 Thibaut Goetghebuer-Planchon <tessil@gmx.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,10 +30,39 @@
 #include <climits>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <iterator>
 #include <limits>
 #include <ratio>
 #include <stdexcept>
+
+
+/**
+ * Only activate tsl_hh_assert if TSL_DEBUG is defined. 
+ * This way we avoid the performance hit when NDEBUG is not defined with assert as tsl_hh_assert is used a lot
+ * (people usually compile with "-O3" and not "-O3 -DNDEBUG").
+ */
+#ifdef TSL_DEBUG
+#    define tsl_hh_assert(expr) assert(expr)
+#else
+#    define tsl_hh_assert(expr) (static_cast<void>(0))
+#endif
+
+
+/**
+ * If exceptions are enabled, throw the exception passed in parameter, otherwise call std::terminate.
+ */
+#if (defined(__cpp_exceptions) || defined(__EXCEPTIONS) || (defined (_MSC_VER) && defined (_CPPUNWIND))) && !defined(TSL_NO_EXCEPTIONS)
+#    define TSL_HH_THROW_OR_TERMINATE(ex, msg) throw ex(msg)
+#else
+#    define TSL_HH_NO_EXCEPTIONS
+#    ifdef NDEBUG
+#        define TSL_HH_THROW_OR_TERMINATE(ex, msg) std::terminate()
+#    else
+#        include <iostream>
+#        define TSL_HH_THROW_OR_TERMINATE(ex, msg) do { std::cerr << msg << std::endl; std::terminate(); } while(0)
+#    endif
+#endif
 
 
 namespace tsl {
@@ -57,7 +86,7 @@ public:
      */
     explicit power_of_two_growth_policy(std::size_t& min_bucket_count_in_out) {
         if(min_bucket_count_in_out > max_bucket_count()) {
-            throw std::length_error("The hash table exceeds its maxmimum size.");
+            TSL_HH_THROW_OR_TERMINATE(std::length_error, "The hash table exceeds its maximum size.");
         }
         
         if(min_bucket_count_in_out > 0) {
@@ -82,7 +111,7 @@ public:
      */
     std::size_t next_bucket_count() const {
         if((m_mask + 1) > max_bucket_count() / GrowthFactor) {
-            throw std::length_error("The hash table exceeds its maxmimum size.");
+            TSL_HH_THROW_OR_TERMINATE(std::length_error, "The hash table exceeds its maximum size.");
         }
         
         return (m_mask + 1) * GrowthFactor;
@@ -142,7 +171,7 @@ class mod_growth_policy {
 public:
     explicit mod_growth_policy(std::size_t& min_bucket_count_in_out) {
         if(min_bucket_count_in_out > max_bucket_count()) {
-            throw std::length_error("The hash table exceeds its maxmimum size.");
+            TSL_HH_THROW_OR_TERMINATE(std::length_error, "The hash table exceeds its maximum size.");
         }
         
         if(min_bucket_count_in_out > 0) {
@@ -159,12 +188,12 @@ public:
     
     std::size_t next_bucket_count() const {
         if(m_mod == max_bucket_count()) {
-            throw std::length_error("The hash table exceeds its maxmimum size.");
+            TSL_HH_THROW_OR_TERMINATE(std::length_error, "The hash table exceeds its maximum size.");
         }
         
         const double next_bucket_count = std::ceil(double(m_mod) * REHASH_SIZE_MULTIPLICATION_FACTOR);
         if(!std::isnormal(next_bucket_count)) {
-            throw std::length_error("The hash table exceeds its maxmimum size.");
+            TSL_HH_THROW_OR_TERMINATE(std::length_error, "The hash table exceeds its maximum size.");
         }
         
         if(next_bucket_count > double(max_bucket_count())) {
@@ -199,11 +228,26 @@ private:
 
 namespace detail {
 
-static constexpr const std::array<std::size_t, 40> PRIMES = {{
-    1ul, 5ul, 17ul, 29ul, 37ul, 53ul, 67ul, 79ul, 97ul, 131ul, 193ul, 257ul, 389ul, 521ul, 769ul, 1031ul, 
-    1543ul, 2053ul, 3079ul, 6151ul, 12289ul, 24593ul, 49157ul, 98317ul, 196613ul, 393241ul, 786433ul, 
-    1572869ul, 3145739ul, 6291469ul, 12582917ul, 25165843ul, 50331653ul, 100663319ul, 201326611ul, 
-    402653189ul, 805306457ul, 1610612741ul, 3221225473ul, 4294967291ul
+#if SIZE_MAX >= ULLONG_MAX
+#define TSL_HH_NB_PRIMES 51
+#elif SIZE_MAX >= ULONG_MAX
+#define TSL_HH_NB_PRIMES 40
+#else
+#define TSL_HH_NB_PRIMES 23
+#endif
+
+static constexpr const std::array<std::size_t, TSL_HH_NB_PRIMES> PRIMES = {{
+    1u, 5u, 17u, 29u, 37u, 53u, 67u, 79u, 97u, 131u, 193u, 257u, 389u, 521u, 769u, 1031u, 
+    1543u, 2053u, 3079u, 6151u, 12289u, 24593u, 49157u,
+#if SIZE_MAX >= ULONG_MAX
+    98317ul, 196613ul, 393241ul, 786433ul, 1572869ul, 3145739ul, 6291469ul, 12582917ul, 
+    25165843ul, 50331653ul, 100663319ul, 201326611ul, 402653189ul, 805306457ul, 1610612741ul, 
+    3221225473ul, 4294967291ul,
+#endif
+#if SIZE_MAX >= ULLONG_MAX
+    6442450939ull, 12884901893ull, 25769803751ull, 51539607551ull, 103079215111ull, 206158430209ull, 
+    412316860441ull, 824633720831ull, 1649267441651ull, 3298534883309ull, 6597069766657ull,
+#endif
 }};
 
 template<unsigned int IPrime>
@@ -211,11 +255,18 @@ static constexpr std::size_t mod(std::size_t hash) { return hash % PRIMES[IPrime
 
 // MOD_PRIME[iprime](hash) returns hash % PRIMES[iprime]. This table allows for faster modulo as the
 // compiler can optimize the modulo code better with a constant known at the compilation.
-static constexpr const std::array<std::size_t(*)(std::size_t), 40> MOD_PRIME = {{ 
+static constexpr const std::array<std::size_t(*)(std::size_t), TSL_HH_NB_PRIMES> MOD_PRIME = {{ 
     &mod<0>, &mod<1>, &mod<2>, &mod<3>, &mod<4>, &mod<5>, &mod<6>, &mod<7>, &mod<8>, &mod<9>, &mod<10>, 
     &mod<11>, &mod<12>, &mod<13>, &mod<14>, &mod<15>, &mod<16>, &mod<17>, &mod<18>, &mod<19>, &mod<20>, 
-    &mod<21>, &mod<22>, &mod<23>, &mod<24>, &mod<25>, &mod<26>, &mod<27>, &mod<28>, &mod<29>, &mod<30>, 
-    &mod<31>, &mod<32>, &mod<33>, &mod<34>, &mod<35>, &mod<36>, &mod<37> , &mod<38>, &mod<39>
+    &mod<21>, &mod<22>,  
+#if SIZE_MAX >= ULONG_MAX
+    &mod<23>, &mod<24>, &mod<25>, &mod<26>, &mod<27>, &mod<28>, &mod<29>, &mod<30>, &mod<31>, &mod<32>, 
+    &mod<33>, &mod<34>, &mod<35>, &mod<36>, &mod<37> , &mod<38>, &mod<39>,
+#endif
+#if SIZE_MAX >= ULLONG_MAX
+    &mod<40>, &mod<41>, &mod<42>, &mod<43>, &mod<44>, &mod<45>, &mod<46>, &mod<47>, &mod<48>, &mod<49>, 
+    &mod<50>,
+#endif
 }};
 
 }
@@ -242,7 +293,7 @@ static constexpr const std::array<std::size_t(*)(std::size_t), 40> MOD_PRIME = {
  * Due to the constant variable in the modulo the compiler is able to optimize the operation
  * by a series of multiplications, substractions and shifts. 
  * 
- * The 'hash % 5' could become something like 'hash - (hash * 0xCCCCCCCD) >> 34) * 5' in a 64 bits environement.
+ * The 'hash % 5' could become something like 'hash - (hash * 0xCCCCCCCD) >> 34) * 5' in a 64 bits environment.
  */
 class prime_growth_policy {
 public:
@@ -250,7 +301,7 @@ public:
         auto it_prime = std::lower_bound(detail::PRIMES.begin(), 
                                          detail::PRIMES.end(), min_bucket_count_in_out);
         if(it_prime == detail::PRIMES.end()) {
-            throw std::length_error("The hash table exceeds its maxmimum size.");
+            TSL_HH_THROW_OR_TERMINATE(std::length_error, "The hash table exceeds its maximum size.");
         }
         
         m_iprime = static_cast<unsigned int>(std::distance(detail::PRIMES.begin(), it_prime));
@@ -268,7 +319,7 @@ public:
     
     std::size_t next_bucket_count() const {
         if(m_iprime + 1 >= detail::PRIMES.size()) {
-            throw std::length_error("The hash table exceeds its maxmimum size.");
+            TSL_HH_THROW_OR_TERMINATE(std::length_error, "The hash table exceeds its maximum size.");
         }
         
         return detail::PRIMES[m_iprime + 1];

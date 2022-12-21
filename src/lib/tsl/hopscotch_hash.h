@@ -1,7 +1,7 @@
 /**
  * MIT License
  * 
- * Copyright (c) 2017 Tessil
+ * Copyright (c) 2017 Thibaut Goetghebuer-Planchon <tessil@gmx.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,26 +44,12 @@
 #include "hopscotch_growth_policy.h"
 
 
-
 #if (defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ < 9))
 #    define TSL_HH_NO_RANGE_ERASE_WITH_CONST_ITERATOR
 #endif
 
 
-/*
- * Only activate tsl_hh_assert if TSL_DEBUG is defined. 
- * This way we avoid the performance hit when NDEBUG is not defined with assert as tsl_hh_assert is used a lot
- * (people usually compile with "-O3" and not "-O3 -DNDEBUG").
- */
-#ifdef TSL_DEBUG
-#    define tsl_hh_assert(expr) assert(expr)
-#else
-#    define tsl_hh_assert(expr) (static_cast<void>(0))
-#endif
-
-
 namespace tsl {
-
 namespace detail_hopscotch_hash {
     
     
@@ -100,7 +86,21 @@ struct is_power_of_two_policy<tsl::hh::power_of_two_growth_policy<GrowthFactor>>
 };
 
 
-
+template<typename T, typename U>
+static T numeric_cast(U value, const char* error_message = "numeric_cast() failed.") {
+    T ret = static_cast<T>(value);
+    if(static_cast<U>(ret) != value) {
+        TSL_HH_THROW_OR_TERMINATE(std::runtime_error, error_message);
+    }
+    
+    const bool is_same_signedness = (std::is_unsigned<T>::value && std::is_unsigned<U>::value) ||
+                                    (std::is_signed<T>::value && std::is_signed<U>::value);
+    if(!is_same_signedness && (ret < T{}) != (value < U{})) {
+        TSL_HH_THROW_OR_TERMINATE(std::runtime_error, error_message);
+    }
+    
+    return ret;
+}
 
 
 /*
@@ -607,7 +607,7 @@ public:
                                             m_nb_elements(0)
     {
         if(bucket_count > max_bucket_count()) {
-            throw std::length_error("The map exceeds its maxmimum size.");
+            TSL_HH_THROW_OR_TERMINATE(std::length_error, "The map exceeds its maximum size.");
         }
         
         if(bucket_count > 0) {
@@ -623,7 +623,7 @@ public:
         this->max_load_factor(max_load_factor);
         
         
-        // Check in the constructor instead of outside of a function to avoi compilation issues
+        // Check in the constructor instead of outside of a function to avoid compilation issues
         // when value_type is not complete.
         static_assert(std::is_nothrow_move_constructible<value_type>::value || 
                       std::is_copy_constructible<value_type>::value, 
@@ -646,7 +646,7 @@ public:
     {
         
         if(bucket_count > max_bucket_count()) {
-            throw std::length_error("The map exceeds its maxmimum size.");
+            TSL_HH_THROW_OR_TERMINATE(std::length_error, "The map exceeds its maximum size.");
         }
         
         if(bucket_count > 0) {
@@ -662,7 +662,7 @@ public:
         this->max_load_factor(max_load_factor);
         
         
-        // Check in the constructor instead of outside of a function to avoi compilation issues
+        // Check in the constructor instead of outside of a function to avoid compilation issues
         // when value_type is not complete.
         static_assert(std::is_nothrow_move_constructible<value_type>::value || 
                       std::is_copy_constructible<value_type>::value, 
@@ -678,9 +678,9 @@ public:
                           m_buckets(m_buckets_data.empty()?static_empty_bucket_ptr():
                                                            m_buckets_data.data()),
                           m_nb_elements(other.m_nb_elements),
-                          m_max_load_factor(other.m_max_load_factor),
+                          m_min_load_threshold_rehash(other.m_min_load_threshold_rehash),
                           m_max_load_threshold_rehash(other.m_max_load_threshold_rehash),
-                          m_min_load_threshold_rehash(other.m_min_load_threshold_rehash) 
+                          m_max_load_factor(other.m_max_load_factor)
     {
     }
     
@@ -700,17 +700,17 @@ public:
                           m_buckets(m_buckets_data.empty()?static_empty_bucket_ptr():
                                                            m_buckets_data.data()),
                           m_nb_elements(other.m_nb_elements),
-                          m_max_load_factor(other.m_max_load_factor),
+                          m_min_load_threshold_rehash(other.m_min_load_threshold_rehash),
                           m_max_load_threshold_rehash(other.m_max_load_threshold_rehash),
-                          m_min_load_threshold_rehash(other.m_min_load_threshold_rehash)
+                          m_max_load_factor(other.m_max_load_factor)
     {
         other.GrowthPolicy::clear();
         other.m_buckets_data.clear();
         other.m_overflow_elements.clear();
         other.m_buckets = static_empty_bucket_ptr();
         other.m_nb_elements = 0;
-        other.m_max_load_threshold_rehash = 0;
         other.m_min_load_threshold_rehash = 0;
+        other.m_max_load_threshold_rehash = 0;
     }
     
     hopscotch_hash& operator=(const hopscotch_hash& other) {
@@ -724,9 +724,10 @@ public:
             m_buckets = m_buckets_data.empty()?static_empty_bucket_ptr():
                                                m_buckets_data.data();
             m_nb_elements = other.m_nb_elements;
-            m_max_load_factor = other.m_max_load_factor;
-            m_max_load_threshold_rehash = other.m_max_load_threshold_rehash;
+            
             m_min_load_threshold_rehash = other.m_min_load_threshold_rehash;
+            m_max_load_threshold_rehash = other.m_max_load_threshold_rehash;
+            m_max_load_factor = other.m_max_load_factor;
         }
         
         return *this;
@@ -1017,9 +1018,9 @@ public:
         swap(m_overflow_elements, other.m_overflow_elements);
         swap(m_buckets, other.m_buckets);
         swap(m_nb_elements, other.m_nb_elements);
-        swap(m_max_load_factor, other.m_max_load_factor);
-        swap(m_max_load_threshold_rehash, other.m_max_load_threshold_rehash);
         swap(m_min_load_threshold_rehash, other.m_min_load_threshold_rehash);
+        swap(m_max_load_threshold_rehash, other.m_max_load_threshold_rehash);
+        swap(m_max_load_factor, other.m_max_load_factor);
     }
     
     
@@ -1048,7 +1049,7 @@ public:
         
         const T* value = find_value_impl(key, hash, m_buckets + bucket_for_hash(hash));
         if(value == nullptr) {
-            throw std::out_of_range("Couldn't find key.");
+            TSL_HH_THROW_OR_TERMINATE(std::out_of_range, "Couldn't find key.");
         }
         else {
             return *value;
@@ -1105,6 +1106,17 @@ public:
     template<class K>
     const_iterator find(const K& key, std::size_t hash) const {
         return find_impl(key, hash, m_buckets + bucket_for_hash(hash));
+    }
+    
+    
+    template<class K>
+    bool contains(const K& key) const {
+        return contains(key, hash_key(key));
+    }
+    
+    template<class K>
+    bool contains(const K& key, std::size_t hash) const {
+        return count(key, hash) != 0;
     }
     
     
@@ -1170,8 +1182,8 @@ public:
     
     void max_load_factor(float ml) {
         m_max_load_factor = std::max(0.1f, std::min(ml, 0.95f));
-        m_max_load_threshold_rehash = size_type(float(bucket_count())*m_max_load_factor);
         m_min_load_threshold_rehash = size_type(float(bucket_count())*MIN_LOAD_FACTOR_FOR_REHASH);
+        m_max_load_threshold_rehash = size_type(float(bucket_count())*m_max_load_factor);
     }
     
     void rehash(size_type count_) {
@@ -1254,7 +1266,9 @@ private:
             }
         }
         
+#ifndef TSL_HH_NO_EXCEPTIONS
         try {
+#endif
             const bool use_stored_hash = USE_STORED_HASH_ON_REHASH(new_map.bucket_count());
             for(auto it_bucket = m_buckets_data.begin(); it_bucket != m_buckets_data.end(); ++it_bucket) {
                 if(it_bucket->empty()) {
@@ -1271,10 +1285,11 @@ private:
                 
                 erase_from_bucket(*it_bucket, bucket_for_hash(hash));
             }
-        } 
+#ifndef TSL_HH_NO_EXCEPTIONS
+        }
         /*
          * The call to insert_value may throw an exception if an element is added to the overflow
-         * list. Rollback the elements in this case.
+         * list and the memory allocation fails. Rollback the elements in this case.
          */
         catch(...) {
             m_overflow_elements.swap(new_map.m_overflow_elements);
@@ -1297,6 +1312,7 @@ private:
             
             throw;
         }
+#endif
         
         new_map.swap(*this);
     }
@@ -1743,6 +1759,18 @@ private:
     static const std::size_t MAX_PROBES_FOR_EMPTY_BUCKET = 12*NeighborhoodSize;
     static constexpr float MIN_LOAD_FACTOR_FOR_REHASH = 0.1f;
     
+    /**
+     * We can only use the hash on rehash if the size of the hash type is the same as the stored one or
+     * if we use a power of two modulo. In the case of the power of two modulo, we just mask
+     * the least significant bytes, we just have to check that the truncated_hash_type didn't truncated
+     * too much bytes.
+     */
+    template<class T = size_type, typename std::enable_if<std::is_same<T, truncated_hash_type>::value>::type* = nullptr>
+    static bool USE_STORED_HASH_ON_REHASH(size_type /*bucket_count*/) {
+        return StoreHash;
+    }
+    
+    template<class T = size_type, typename std::enable_if<!std::is_same<T, truncated_hash_type>::value>::type* = nullptr>
     static bool USE_STORED_HASH_ON_REHASH(size_type bucket_count) {
         (void) bucket_count;
         if(StoreHash && is_power_of_two_policy<GrowthPolicy>::value) {
@@ -1777,18 +1805,18 @@ private:
     
     size_type m_nb_elements;
     
-    float m_max_load_factor;
+    /**
+     * Min size of the hash table before a rehash can occurs automatically (except if m_max_load_threshold_rehash os reached).
+     * If the neighborhood of a bucket is full before the min is reacher, the elements are put into m_overflow_elements.
+     */
+    size_type m_min_load_threshold_rehash;
     
     /**
      * Max size of the hash table before a rehash occurs automatically to grow the table.
      */
     size_type m_max_load_threshold_rehash;
     
-    /**
-     * Min size of the hash table before a rehash can occurs automatically (except if m_max_load_threshold_rehash os reached).
-     * If the neighborhood of a bucket is full before the min is reacher, the elements are put into m_overflow_elements.
-     */
-    size_type m_min_load_threshold_rehash;
+    float m_max_load_factor;
 };
 
 } // end namespace detail_hopscotch_hash
