@@ -291,3 +291,21 @@ test_that("Stress test, compared to environment", {
     expect_mapequal(as.list(e), m$as_list())
   }
 })
+
+
+test_that("Cloning", {
+  m <- fastmap()
+  m$mset(a=1, b=2, c=3)
+
+  m1 <- m$clone()
+  expect_setequal(c("a", "b", "c"), m1$keys())
+  expect_mapequal(list(a=1, b=2, c=3), m1$as_list())
+
+  # Make sure the original and copy are independent.
+  m1$set("a", 10)
+  m1$remove("c")
+  m$set("a", 1000)
+  m$remove("b")
+  expect_mapequal(list(a=10, b=2), m1$as_list())
+  expect_mapequal(list(a=1000, c=3), m$as_list())
+})
