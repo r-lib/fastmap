@@ -223,7 +223,7 @@ test_that("Vectorized operations are all-or-nothing", {
   expect_identical(m$get("a"), key_missing())
 
 
-  # get(): one bad key stops all from being removed.
+  # mget(): bad key results in error.
   m$mset(a=1, b=2, c=3)
   expect_error(m$mget(c("a", NA, "c")))
 
@@ -233,7 +233,7 @@ test_that("Vectorized operations are all-or-nothing", {
   expect_mapequal(m$as_list(), list(a=1, b=2, c=3))
   expect_identical(m$get("a"), 1)
 
-  # has(): one bad key stops all from being removed.
+  # has(): bad key results in error.
   expect_error(m$has(c("a", "", "c")))
   expect_identical(m$size(), 3L)
   expect_mapequal(m$as_list(), list(a=1, b=2, c=3))
