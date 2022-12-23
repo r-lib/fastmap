@@ -213,6 +213,17 @@ extern "C" {
     return idxs;
   }
 
+  SEXP C_map_copy(SEXP map_xptr) {
+    SEXP new_map_xptr = C_map_create();
+    si_map* new_map = map_from_xptr(new_map_xptr);
+
+    si_map* map = map_from_xptr(map_xptr);
+
+    *new_map = *map;
+
+    return new_map_xptr;
+  }
+
   // Convert an R character vector to UTF-8. This is necessary because iconv
   // doesn't really work for vectors where the items have mixed encoding.
   SEXP C_char_vec_to_utf8(SEXP str) {
