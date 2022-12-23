@@ -1,3 +1,10 @@
+fastmap 1.1.0.9000
+=============
+
+* Updated hopscotch-map library to 2.3.0.
+
+* Changed `fastmap`'s `$has()` method to use C++ `contains()` method (which is new in hopscotch-map 2.3.0).
+
 fastmap 1.1.0
 =============
 
