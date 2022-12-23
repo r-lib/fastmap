@@ -334,6 +334,22 @@ fastmap <- function(missing_default = NULL) {
     .Call(C_map_keys, key_idx_map, sort)
   }
 
+  clone <- function() {
+    m <- fastmap()
+    # Use this env to access internal objects of the new fastmap object.
+    e <- environment(m$get)
+    e$ensure_restore_map()
+
+    e$n           <- n
+    e$key_idx_map <- .Call(C_map_copy, key_idx_map)
+    e$keys_       <- keys_
+    e$values      <- values
+    e$holes       <- holes
+    e$n_holes     <- n_holes
+
+    m
+  }
+
   as_list <- function(sort = FALSE) {
     ensure_restore_map()
     keys_idxs <- .Call(C_map_keys_idxs, key_idx_map, sort)
@@ -429,6 +445,7 @@ fastmap <- function(missing_default = NULL) {
     remove = remove,
     keys = keys,
     size = size,
+    clone = clone,
     as_list = as_list
   )
 }
