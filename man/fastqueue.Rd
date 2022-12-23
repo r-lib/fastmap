@@ -33,7 +33,7 @@ the queue. If the queue is empty, this will return \code{missing}, which
 defaults to the value of \code{missing_default} that \code{queue()} was created
 with (typically, \code{NULL}).
 }
-\item{\code{remove(n, missing = missing_default)}}{
+\item{\code{mremove(n, missing = missing_default)}}{
 Remove and return the next \code{n} objects on the queue, in a list. The first
 element of the list is the oldest object in the queue (in other words,
 the next item that would be returned by \code{remove()}). If \code{n} is greater

@@ -78,6 +78,9 @@ sorted according to their Unicode code point values.
 \item{\code{size()}}{
 Returns the number of items in the map.
 }
+\item{\code{clone()}}{
+Returns a copy of the fastmap object.
+}
 \item{\code{as_list(sort = FALSE)}}{
 Return a named list where the names are the keys from the map, and the
 values are the values. By default, the keys will be in arbitrary order.

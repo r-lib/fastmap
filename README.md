@@ -81,6 +81,9 @@ str(m$as_list())
 
 # Clear the map
 m$reset()
+
+# Create a copy of the fastmap
+m1 <- m$clone()
 ```
 
 By default, `get()` returns `NULL` for keys that aren't present. You can instead specify a sentinel value to return for missing keys, either when the fastmap is created, or when `get()` is called. For example, you can return a `key_missing()` object to represent missing values:
