@@ -34,6 +34,19 @@ test_that("Serializing and unserializing a map", {
   expect_true(all(Encoding(m1$keys()) %in% c("unknown", "UTF-8")))
 })
 
+
+test_that("Serializing and unserializing fastmap with no holes", {
+  x <- seq_len(32)
+
+  m <- fastmap()
+  m$mset(.list = setNames(x, as.character(x)))
+  m1 <- unserialize(serialize(m, NULL))
+
+  expect_length(m1$as_list(), 32)
+  expect_mapequal(m$as_list(), m1$as_list())
+})
+
+
 test_that("Serializing and unserializing stress test", {
   set.seed(3524)
 

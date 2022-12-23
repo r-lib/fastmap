@@ -7,6 +7,8 @@ fastmap 1.1.0.9000
 
 * Closed #24: Added a `$clone()` method to `fastmap`. (#26)
 
+* Fixed #27: If a `fastmap` object has no holes in the lists storing keys and values, and then it is serialized and then unserialized, the new `fastmap` would contain zero items. (#28)
+
 fastmap 1.1.0
 =============
 

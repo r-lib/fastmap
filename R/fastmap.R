@@ -431,8 +431,14 @@ fastmap <- function(missing_default = NULL) {
 
     # Repopulate key_idx_map.
     key_idx_map <<- .Call(C_map_create)
-    holes <- holes[seq_len(n_holes)]
-    idxs <- seq_along(keys_)[-holes]
+    if (n_holes == 0) {
+      # Need to special case when 0 holes, because x[-integer(0)] (as done in
+      # the other code path) returns an empty vector, instead of the original x.
+      idxs <- seq_along(keys_)
+    } else {
+      holes <- holes[seq_len(n_holes)]
+      idxs <- seq_along(keys_)[-holes]
+    }
     for (idx in idxs) {
       .Call(C_map_set, key_idx_map, keys_[idx], idx)
     }
