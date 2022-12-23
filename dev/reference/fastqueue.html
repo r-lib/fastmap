@@ -85,7 +85,7 @@ the queue. If the queue is empty, this will return <code>missing</code>, which
 defaults to the value of <code>missing_default</code> that <code>queue()</code> was created
 with (typically, <code>NULL</code>).</p></dd>
 
-<dt><code>remove(n, missing = missing_default)</code></dt>
+<dt><code>mremove(n, missing = missing_default)</code></dt>
 <dd><p>Remove and return the next <code>n</code> objects on the queue, in a list. The first
 element of the list is the oldest object in the queue (in other words,
 the next item that would be returned by <code><a href="https://rdrr.io/r/base/rm.html" class="external-link">remove()</a></code>). If <code>n</code> is greater

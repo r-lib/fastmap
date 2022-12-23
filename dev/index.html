@@ -152,7 +152,10 @@
 <span><span class="co">#&gt;  $ numbers: num [1:3] 10 20 30</span></span>
 <span></span>
 <span><span class="co"># Clear the map</span></span>
-<span><span class="va">m</span><span class="op">$</span><span class="fu">reset</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">m</span><span class="op">$</span><span class="fu">reset</span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Create a copy of the fastmap</span></span>
+<span><span class="va">m1</span> <span class="op">&lt;-</span> <span class="va">m</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>By default, <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code> returns <code>NULL</code> for keys that aren’t present. You can instead specify a sentinel value to return for missing keys, either when the fastmap is created, or when <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code> is called. For example, you can return a <code><a href="reference/key_missing.html">key_missing()</a></code> object to represent missing values:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Specify missing value when get() is called</span></span>
