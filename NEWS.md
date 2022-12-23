@@ -5,6 +5,8 @@ fastmap 1.1.0.9000
 
 * Changed `fastmap`'s `$has()` method to use C++ `contains()` method (which is new in hopscotch-map 2.3.0).
 
+* Closed #24: Added a `$clone()` method to `fastmap`. (#26)
+
 fastmap 1.1.0
 =============
 
