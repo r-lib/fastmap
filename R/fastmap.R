@@ -171,7 +171,11 @@ fastmap <- function(missing_default = NULL) {
   # entry is replaced with NA, and n_holes is updated to reflect it; this is
   # instead of simply shrinking the holes vector, because that involves copying
   # the entire object.
+  # Has a structure like this, with numbers at the beginning and NA's at the
+  # end:
+  #   1 2 3 4 5 NA NA NA
   holes <- NULL
+  # A number. For the example above, n_holes would be 5.
   n_holes <- NULL
 
   # ===================================
@@ -334,8 +338,16 @@ fastmap <- function(missing_default = NULL) {
   }
 
   keys <- function(sort = FALSE) {
-    ensure_restore_map()
-    .Call(C_map_keys, key_idx_map, sort)
+    # The implementation below is equivalent to the following, but about 100x
+    # faster:
+    #   ensure_restore_map()
+    #   .Call(C_map_keys, key_idx_map, sort)
+
+    k <- keys_[non_hole_idxs_()]
+    if (sort) {
+      k <- sort(k, method = "radix")
+    }
+    k
   }
 
   clone <- function() {
@@ -355,13 +367,30 @@ fastmap <- function(missing_default = NULL) {
   }
 
   as_list <- function(sort = FALSE) {
-    ensure_restore_map()
-    keys_idxs <- .Call(C_map_keys_idxs, key_idx_map, sort)
-    result <- values[keys_idxs]
-    names(result) <- names(keys_idxs)
+    idxs <- non_hole_idxs_()
+    result <- values[idxs]
+    names(result) <- keys_[idxs]
+    if (sort) {
+      result <- result[order(names(result))]
+    }
     result
   }
 
+
+  # Internal function
+  #
+  # Returns a vector containing the indices of the non-holes in the keys_ and
+  # values lists.
+  non_hole_idxs_ <- function() {
+    # Need to special case when 0 holes, because x[-integer(0)] (as done in
+    # the other code path) returns an empty vector, instead of the original x.
+    if (n_holes == 0) {
+      seq_along(keys_)
+    } else {
+      h <- holes[seq_len(n_holes)]
+      seq_along(keys_)[-h]
+    }
+  }
 
   # Internal function
   grow <- function() {
@@ -432,14 +461,7 @@ fastmap <- function(missing_default = NULL) {
 
     # Repopulate key_idx_map.
     key_idx_map <<- .Call(C_map_create)
-    if (n_holes == 0) {
-      # Need to special case when 0 holes, because x[-integer(0)] (as done in
-      # the other code path) returns an empty vector, instead of the original x.
-      idxs <- seq_along(keys_)
-    } else {
-      holes <- holes[seq_len(n_holes)]
-      idxs <- seq_along(keys_)[-holes]
-    }
+    idxs <- non_hole_idxs_()
     for (idx in idxs) {
       .Call(C_map_set, key_idx_map, keys_[idx], idx)
     }

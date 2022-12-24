@@ -309,3 +309,23 @@ test_that("Cloning", {
   expect_mapequal(list(a=10, b=2), m1$as_list())
   expect_mapequal(list(a=1000, c=3), m$as_list())
 })
+
+
+test_that("keys() implementation", {
+  # These tests compare the C_map_keys function (implemented in C++) to the
+  # faster keys() method (implemented in R).
+
+  # Call the C_map_keys function
+  c_keys <- function (m, sort = FALSE) {
+    .Call(fastmap:::C_map_keys, env(m)$key_idx_map, sort)
+  }
+
+  m <- fastmap()
+
+  expect_setequal(m$keys(), c_keys(m))
+  expect_identical(m$keys(TRUE), c_keys(m, TRUE))
+
+  m$mset(a=1, b=2, c=3)
+  expect_setequal(m$keys(), c_keys(m))
+  expect_identical(m$keys(TRUE), c_keys(m, TRUE))
+})
