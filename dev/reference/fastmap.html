@@ -125,7 +125,8 @@ sorted according to their Unicode code point values.</p></dd>
 <dd><p>Returns the number of items in the map.</p></dd>
 
 <dt><code>clone()</code></dt>
-<dd><p>Returns a copy of the fastmap object.</p></dd>
+<dd><p>Returns a copy of the fastmap object. This is a shallow clone; objects in
+the fastmap will not be copied.</p></dd>
 
 <dt><code>as_list(sort = FALSE)</code></dt>
 <dd><p>Return a named list where the names are the keys from the map, and the

@@ -53,6 +53,7 @@
 <li><p>Changed <code>fastmap</code>’s <code>$has()</code> method to use C++ <code>contains()</code> method (which is new in hopscotch-map 2.3.0).</p></li>
 <li><p>Closed <a href="https://github.com/r-lib/fastmap/issues/24" class="external-link">#24</a>: Added a <code>$clone()</code> method to <code>fastmap</code>. (<a href="https://github.com/r-lib/fastmap/issues/26" class="external-link">#26</a>)</p></li>
 <li><p>Fixed <a href="https://github.com/r-lib/fastmap/issues/27" class="external-link">#27</a>: If a <code>fastmap</code> object has no holes in the lists storing keys and values, and then it is serialized and then unserialized, the new <code>fastmap</code> would contain zero items. (<a href="https://github.com/r-lib/fastmap/issues/28" class="external-link">#28</a>)</p></li>
+<li><p>Faster implementations of <code>fastmap</code> <code>$keys()</code> and <code>$as_list()</code> methods.</p></li>
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.1.0" id="fastmap-110">fastmap 1.1.0<small>2021-01-25</small><a class="anchor" aria-label="anchor" href="#fastmap-110"></a></h2>
