@@ -7,10 +7,9 @@
 fastmap(missing_default = NULL)
 }
 \arguments{
-\item{missing_default}{The value to return when \code{get()} is called with a
-key that is not in the map. The default is \code{NULL}, but in some cases
-it can be useful to return a sentinel value, such as a
-\code{\link{key_missing}} object.}
+\item{missing_default}{The value to return when \code{get()} is called with a key
+that is not in the map. The default is \code{NULL}, but in some cases it can be
+useful to return a sentinel value, such as a \code{\link{key_missing}} object.}
 }
 \description{
 A fastmap object provides a key-value store where the keys are strings and
@@ -25,19 +24,19 @@ keys are used, this can cause a non-trivial amount of memory leakage.
 Fastmap objects do not use the symbol table and do not leak memory.
 
 Unlike with environments, the keys in a fastmap are always encoded as UTF-8,
-so if you call \code{$set()} with two different strings that have the same
-Unicode values but have different encodings, the second call will overwrite
-the first value. If you call \code{$keys()}, it will return UTF-8 encoded
-strings, and similarly, \code{$as_list()} will return a list with names that
-have UTF-8 encoding.
+so if you call \verb{$set()} with two different strings that have the same Unicode
+values but have different encodings, the second call will overwrite the first
+value. If you call \verb{$keys()}, it will return UTF-8 encoded strings, and
+similarly, \verb{$as_list()} will return a list with names that have UTF-8
+encoding.
 
-Note that if you call \code{$mset()} with a named argument, where the name is
+Note that if you call \verb{$mset()} with a named argument, where the name is
 non-ASCII, R will convert the name to the native encoding before fastmap has
 the chance to convert them to UTF-8, and the keys may get mangled in the
-process. However, if you use \code{$mset(.list = x)}, then R will not convert
-the keys to the native encoding, and the keys will be correctly converted to
-UTF-8. With \code{$mget()}, the keys will be converted to UTF-8 before they
-are fetched.
+process. However, if you use \verb{$mset(.list = x)}, then R will not convert the
+keys to the native encoding, and the keys will be correctly converted to
+UTF-8. With \verb{$mget()}, the keys will be converted to UTF-8 before they are
+fetched.
 
 \code{fastmap} objects have the following methods:
 
@@ -47,27 +46,27 @@ Set a key-value pair. \code{key} must be a string. Returns \code{value}.
 }
 \item{\code{mset(..., .list = NULL)}}{
 Set multiple key-value pairs. The key-value pairs are named arguments,
-and/or a list passed in as \code{.list}. Returns a named list where the
-names are the keys, and the values are the values.
+and/or a named list passed in as \code{.list}. Returns a named list where
+the names are the keys, and the values are the values.
 }
 \item{\code{get(key, missing = missing_default)}}{
-Get a value corresponding to \code{key}. If the key is not in the map,
+Get a value corresponding to \code{key}. If the key is not in the fastmap,
 return \code{missing}.
 }
 \item{\code{mget(keys, missing = missing_default)}}{
 Get values corresponding to \code{keys}, which is a character vector. The
 values will be returned in a named list where the names are the same as
-the \code{keys} passed in, in the same order. For keys not in the map,
+the \code{keys} passed in, in the same order. For keys not in the fastmap,
 they will have \code{missing} for their value.
 }
 \item{\code{has(keys)}}{
 Given a vector of keys, returns a logical vector reporting whether each
-key is contained in the map.
+key is contained in the fastmap
 }
 \item{\code{remove(keys)}}{
-Given a vector of keys, remove the key-value pairs from the map. Returns
+Given a vector of keys, remove the key-value pairs from the fastmap Returns
 a logical vector reporting whether each item existed in (and was removed
-from) the map.
+from) the fastmap.
 }
 \item{\code{keys(sort = FALSE)}}{
 Returns a character vector of all the keys. By default, the keys will be
@@ -78,10 +77,6 @@ sorted according to their Unicode code point values.
 \item{\code{size()}}{
 Returns the number of items in the map.
 }
-\item{\code{clone()}}{
-Returns a copy of the fastmap object. This is a shallow clone; objects in
-the fastmap will not be copied.
-}
 \item{\code{as_list(sort = FALSE)}}{
 Return a named list where the names are the keys from the map, and the
 values are the values. By default, the keys will be in arbitrary order.
@@ -91,6 +86,49 @@ to their Unicode code point values.
 }
 \item{\code{reset()}}{
 Reset the fastmap object, clearing all items.
+}
+\item{\code{clone()}}{
+Returns a copy of the fastmap object. This is a shallow clone; objects in
+the fastmap will not be copied.
+}
+\item{\code{map(fn)}}{
+Apply a function with signature \verb{function(v)} to each element, collect
+the return values, and return a new fastmap object with those values.
+}
+\item{\code{map_with_key(fn)}}{
+Apply a function with signature \verb{function(k, v)} to each element, collect
+the return values, and return a new fastmap object with those values.
+}
+\item{\code{modify(fn)}}{
+Apply a function with signature \verb{function(v)} to each element and update
+the key with the returned value. Returns \code{NULL}.
+}
+\item{\code{modify_with_key(fn)}}{
+Apply a function with signature \verb{function(k, v)} to each element and
+update the key with the returned value. Returns \code{NULL}.
+}
+\item{\code{walk(fn)}}{
+Apply a function with signature \verb{function(v)} to each element, and do not
+collect the return value. (Because it does not collect the return values,
+this can be faster than \code{map()} and \code{modify()}.) Returns \code{NULL}.
+}
+\item{\code{walk_with_key(fn)}}{
+Apply a function with signature \verb{function(k, v)} to each element, and do
+not collect the return value. Returns \code{NULL}.
+}
+\item{\code{filter(fn)}}{
+Create a copy of the fastmap, keeping only elements for which \code{fn(v)}
+returns a truthy value. Returns a new fastmap object.
+}
+\item{\code{filter_with_key(fn)}}{
+Create a copy of the fastmap, keeping only elements for which \code{fn(k, v)}
+returns a truthy value. Returns a new fastmap object.
+}
+\item{\code{filter_key(fn)}}{
+Create a copy of the fastmap, keeping only elements for which \code{fn(k)}
+returns a truthy value. (This can be faster than \code{filter_with_key()}
+because it does not need to fetch the value of each element.) Returns a
+new fastmap object.
 }
 }
 }

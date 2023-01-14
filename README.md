@@ -23,7 +23,44 @@ install.packages("fastmap")
 ```
 
 
-## Usage
+## API
+
+`fastmap` objects are unordered maps. The keys are UTF-8 strings, and the values are any R object.
+
+To create a fastmap object:
+
+```
+m <- fastmap()
+```
+
+`fastmap` objects have the following methods:
+
+* `set(key, value)`: Set a key-value pair. `key` must be a string. Returns `value`.
+* `mset(..., .list = NULL)`: Set multiple key-value pairs.  The key-value pairs are named arguments, and/or a named list passed in as `.list`.
+* `get(key, missing = missing_default)`: Get the value for `key`. If the key is not in the fastmap, return `missing`.
+* `mget(keys, missing = missing_default)`: Get values corresponding to `keys`, which is a character vector. The values will be returned in a named list where the names are the same as the `keys` passed in, in the same order. For keys not in the fastmap, they will have `missing` for their value.
+* `has(keys)`: Given a vector of keys, returns a logical vector reporting whether each key is contained in the fastmap.
+* `remove(keys)`: Given a vector of keys, remove the key-value pairs from the fastmap. Returns a logical vector reporting whether each item existed in (and was removed from) the fastmap.
+* `keys(sort = FALSE)`: Returns a character vector of all the keys. By default, the keys will be in an arbitrary order. Note that the order can vary across platforms and is not guaranteed to be consistent. With `sort=TRUE`, the keys will be sorted according to their Unicode code point values.
+* `size()`: Return the number of items in the fastmap.
+* `as_list(sort = FALSE)`: Return a named list with the items in the fastmap. By default, the keys will be in an arbitrary order. Note that the order can vary across platforms and is not guaranteed to be consistent. With `sort=TRUE`, the keys will be sorted according to their Unicode code point values.
+* `reset()`: Reset the fastmap object, clearing all items.
+* `clone()`: Create a (shallow) copy of this fastmap.
+
+* Functional programming methods. Note that these methods apply functions in an unspecified order. The order is not guaranteed to be consistent.
+  * `map(fn)`: Apply a function with signature `function(v)` to each element, collect the return values, and return a new fastmap object with those values.
+  * `map_with_key(fn)`: Apply a function with signature `function(k, v)` to each element, collect the return values, and return a new fastmap object with those values.
+
+  * `modify(fn)`: Apply a function with signature `function(v)` to each element and update the key with the returned value. Returns `NULL`.
+  * `modify_with_key(fn)` Apply a function with signature `function(k, v)` to each element and update the key with the returned value. Returns `NULL`.
+  * `walk(fn)`: Apply a function with signature `function(v)` to each element, and do not collect the return value. (Because it does not collect the return values, this can be faster than `map()` and `modify()`.) Returns `NULL`.
+  * `walk_with_key(fn)`: Apply a function with signature `function(k, v)` to each element, and do not collect the return value. Returns `NULL`.
+  * `filter(fn)`: Create a copy of the fastmap, keeping only elements for which `fn(v)` returns a truthy value. Returns a new fastmap object.
+  * `filter_with_key(fn)`: Create a copy of the fastmap, keeping only elements for which `fn(k, v)` returns a truthy value. Returns a new fastmap object.
+  * `filter_key(fn)`: Create a copy of the fastmap, keeping only elements for which `fn(k)` returns a truthy value. (This can be faster than `filter_with_key()` because it does not need to fetch the value of each element.) Returns a new fastmap object.
+
+
+## Example usage
 
 ### `fastmap()`
 

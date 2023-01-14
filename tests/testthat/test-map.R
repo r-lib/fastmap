@@ -313,7 +313,8 @@ test_that("Cloning", {
 
 test_that("keys() implementation", {
   # These tests compare the C_map_keys function (implemented in C++) to the
-  # faster keys() method (implemented in R).
+  # faster keys() method (implemented in R). The purpose of this test is to make
+  # sure the R and C++ data structures are in sync.
 
   # Call the C_map_keys function
   c_keys <- function (m, sort = FALSE) {
@@ -328,4 +329,56 @@ test_that("keys() implementation", {
   m$mset(a=1, b=2, c=3)
   expect_setequal(m$keys(), c_keys(m))
   expect_identical(m$keys(TRUE), c_keys(m, TRUE))
+})
+
+
+test_that("map() and map_with_key()", {
+  m <- fastmap()
+  m$mset(a=1, b=2, c=3)
+
+  m1 <- m$map(function(x) x * 10)
+  expect_mapequal(list(a=10, b=20, c=30), m1$as_list())
+  # Make sure m and m1 don't interfere with each other.
+  expect_mapequal(list(a=1, b=2, c=3), m$as_list())
+  m$set("d", 4)
+  m$remove("c")
+  m1$set("d", 40)
+  m1$remove("b")
+  expect_mapequal(list(a=1, b=2, d=4), m$as_list())
+  expect_mapequal(list(a=10, c=30, d=40), m1$as_list())
+
+  m2 <- m1$map_with_key(function(k, v) paste0(k, ":", v))
+  m2$as_list()
+  expect_mapequal(list(a="a:10", c="c:30", d="d:40"), m2$as_list())
+  # Make sure m1 is unchanged.
+  expect_mapequal(list(a=10, c=30, d=40), m1$as_list())
+})
+
+
+test_that("modify() and modify_with_key()", {
+  m <- fastmap()
+  m$mset(a=1, b=2, c=3)
+
+  expect_null(m$modify(function(x) x * 10))
+  expect_mapequal(list(a=10, b=20, c=30), m$as_list())
+
+  expect_null(m$modify_with_key(function(k, v) paste0(k, ":", v)))
+  expect_mapequal(list(a="a:10", b="b:20", c="c:30"), m$as_list())
+})
+
+
+
+test_that("walk() and walk_with_key()", {
+  m <- fastmap()
+  m$mset(a=1, b=2, c=3)
+
+  res <- list()
+  expect_null(m$walk(function(x) res <<- c(res, x * 10)))
+  expect_mapequal(list(a=1, b=2, c=3), m$as_list())
+  expect_setequal(list(10, 20, 30), res)
+
+  res <- list()
+  expect_null(m$walk_with_key(function(k, v) res <<- c(res,paste0(k, ":", v))))
+  expect_mapequal(list(a=1, b=2, c=3), m$as_list())
+  expect_setequal(list("a:1", "b:2", "c:3"), res)
 })
