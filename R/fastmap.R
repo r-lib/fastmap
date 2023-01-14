@@ -320,10 +320,10 @@ fastmap <- function(missing_default = NULL) {
 
   remove <- function(keys) {
     if (!(is.character(keys) || is.null(keys))) {
-      stop("mget: `keys` must be a character vector or NULL")
+      stop("remove: `keys` must be a character vector or NULL")
     }
     if (any(keys == "") || any(is.na(keys))) {
-      stop('mget: `keys` must not be "" or NA')
+      stop('remove: `keys` must not be "" or NA')
     }
     if (length(keys) == 1) {
       # In the common case of only one key, it's faster to avoid vapply.
