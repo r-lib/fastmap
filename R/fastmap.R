@@ -15,80 +15,118 @@ NULL
 #' Fastmap objects do not use the symbol table and do not leak memory.
 #'
 #' Unlike with environments, the keys in a fastmap are always encoded as UTF-8,
-#' so if you call \code{$set()} with two different strings that have the same
-#' Unicode values but have different encodings, the second call will overwrite
-#' the first value. If you call \code{$keys()}, it will return UTF-8 encoded
-#' strings, and similarly, \code{$as_list()} will return a list with names that
-#' have UTF-8 encoding.
+#' so if you call `$set()` with two different strings that have the same Unicode
+#' values but have different encodings, the second call will overwrite the first
+#' value. If you call `$keys()`, it will return UTF-8 encoded strings, and
+#' similarly, `$as_list()` will return a list with names that have UTF-8
+#' encoding.
 #'
-#' Note that if you call \code{$mset()} with a named argument, where the name is
+#' Note that if you call `$mset()` with a named argument, where the name is
 #' non-ASCII, R will convert the name to the native encoding before fastmap has
 #' the chance to convert them to UTF-8, and the keys may get mangled in the
-#' process. However, if you use \code{$mset(.list = x)}, then R will not convert
-#' the keys to the native encoding, and the keys will be correctly converted to
-#' UTF-8. With \code{$mget()}, the keys will be converted to UTF-8 before they
-#' are fetched.
+#' process. However, if you use `$mset(.list = x)`, then R will not convert the
+#' keys to the native encoding, and the keys will be correctly converted to
+#' UTF-8. With `$mget()`, the keys will be converted to UTF-8 before they are
+#' fetched.
 #'
 #'
 #' `fastmap` objects have the following methods:
 #'
 #' \describe{
-#'   \item{\code{set(key, value)}}{
-#'     Set a key-value pair. \code{key} must be a string. Returns \code{value}.
+#'   \item{`set(key, value)`}{
+#'     Set a key-value pair. `key` must be a string. Returns `value`.
 #'   }
-#'   \item{\code{mset(..., .list = NULL)}}{
+#'   \item{`mset(..., .list = NULL)`}{
 #'     Set multiple key-value pairs. The key-value pairs are named arguments,
-#'     and/or a list passed in as \code{.list}. Returns a named list where the
-#'     names are the keys, and the values are the values.
+#'     and/or a named list passed in as `.list`. Returns a named list where
+#'     the names are the keys, and the values are the values.
 #'   }
-#'   \item{\code{get(key, missing = missing_default)}}{
-#'     Get a value corresponding to \code{key}. If the key is not in the map,
-#'     return \code{missing}.
+#'   \item{`get(key, missing = missing_default)`}{
+#'     Get a value corresponding to `key`. If the key is not in the fastmap,
+#'     return `missing`.
 #'   }
-#'   \item{\code{mget(keys, missing = missing_default)}}{
-#'     Get values corresponding to \code{keys}, which is a character vector. The
+#'   \item{`mget(keys, missing = missing_default)`}{
+#'     Get values corresponding to `keys`, which is a character vector. The
 #'     values will be returned in a named list where the names are the same as
-#'     the \code{keys} passed in, in the same order. For keys not in the map,
-#'     they will have \code{missing} for their value.
+#'     the `keys` passed in, in the same order. For keys not in the fastmap,
+#'     they will have `missing` for their value.
 #'   }
-#'   \item{\code{has(keys)}}{
+#'   \item{`has(keys)`}{
 #'     Given a vector of keys, returns a logical vector reporting whether each
-#'     key is contained in the map.
+#'     key is contained in the fastmap
 #'   }
-#'   \item{\code{remove(keys)}}{
-#'     Given a vector of keys, remove the key-value pairs from the map. Returns
+#'   \item{`remove(keys)`}{
+#'     Given a vector of keys, remove the key-value pairs from the fastmap Returns
 #'     a logical vector reporting whether each item existed in (and was removed
-#'     from) the map.
+#'     from) the fastmap.
 #'   }
-#'   \item{\code{keys(sort = FALSE)}}{
+#'   \item{`keys(sort = FALSE)`}{
 #'     Returns a character vector of all the keys. By default, the keys will be
 #'     in arbitrary order. Note that the order can vary across platforms and is
-#'     not guaranteed to be consistent. With \code{sort=TRUE}, the keys will be
+#'     not guaranteed to be consistent. With `sort=TRUE`, the keys will be
 #'     sorted according to their Unicode code point values.
 #'   }
-#'   \item{\code{size()}}{
+#'   \item{`size()`}{
 #'     Returns the number of items in the map.
 #'   }
-#'   \item{\code{clone()}}{
-#'     Returns a copy of the fastmap object. This is a shallow clone; objects in
-#'     the fastmap will not be copied.
-#'   }
-#'   \item{\code{as_list(sort = FALSE)}}{
+#'   \item{`as_list(sort = FALSE)`}{
 #'     Return a named list where the names are the keys from the map, and the
 #'     values are the values. By default, the keys will be in arbitrary order.
 #'     Note that the order can vary across platforms and is not guaranteed to
-#'     be consistent. With \code{sort=TRUE}, the keys will be sorted according
+#'     be consistent. With `sort=TRUE`, the keys will be sorted according
 #'     to their Unicode code point values.
 #'   }
-#'   \item{\code{reset()}}{
+#'   \item{`reset()`}{
 #'     Reset the fastmap object, clearing all items.
+#'   }
+#'   \item{`clone()`}{
+#'     Returns a copy of the fastmap object. This is a shallow clone; objects in
+#'     the fastmap will not be copied.
+#'   }
+#'   \item{`map(fn)`}{
+#'     Apply a function with signature `function(v)` to each element, collect
+#'     the return values, and return a new fastmap object with those values.
+#'   }
+#'   \item{`map_with_key(fn)`}{
+#'     Apply a function with signature `function(k, v)` to each element, collect
+#'     the return values, and return a new fastmap object with those values.
+#'   }
+#'   \item{`modify(fn)`}{
+#'     Apply a function with signature `function(v)` to each element and update
+#'     the key with the returned value. Returns `NULL`.
+#'   }
+#'   \item{`modify_with_key(fn)`}{
+#'     Apply a function with signature `function(k, v)` to each element and
+#'     update the key with the returned value. Returns `NULL`.
+#'   }
+#'   \item{`walk(fn)`}{
+#'     Apply a function with signature `function(v)` to each element, and do not
+#'     collect the return value. (Because it does not collect the return values,
+#'     this can be faster than `map()` and `modify()`.) Returns `NULL`.
+#'   }
+#'   \item{`walk_with_key(fn)`}{
+#'     Apply a function with signature `function(k, v)` to each element, and do
+#'     not collect the return value. Returns `NULL`.
+#'   }
+#'   \item{`filter(fn)`}{
+#'     Create a copy of the fastmap, keeping only elements for which `fn(v)`
+#'     returns a truthy value. Returns a new fastmap object.
+#'   }
+#'   \item{`filter_with_key(fn)`}{
+#'     Create a copy of the fastmap, keeping only elements for which `fn(k, v)`
+#'     returns a truthy value. Returns a new fastmap object.
+#'   }
+#'   \item{`filter_key(fn)`}{
+#'     Create a copy of the fastmap, keeping only elements for which `fn(k)`
+#'     returns a truthy value. (This can be faster than `filter_with_key()`
+#'     because it does not need to fetch the value of each element.) Returns a
+#'     new fastmap object.
 #'   }
 #' }
 #'
-#' @param missing_default The value to return when \code{get()} is called with a
-#'   key that is not in the map. The default is \code{NULL}, but in some cases
-#'   it can be useful to return a sentinel value, such as a
-#'   \code{\link{key_missing}} object.
+#' @param missing_default The value to return when `get()` is called with a key
+#'   that is not in the map. The default is `NULL`, but in some cases it can be
+#'   useful to return a sentinel value, such as a [`key_missing`] object.
 #'
 #' @examples
 #' # Create the fastmap object
@@ -366,6 +404,102 @@ fastmap <- function(missing_default = NULL) {
     m
   }
 
+  # This implementation of map_values() uses clone(), which is very fast, and
+  # then calls fn() on each value in the backing list, without looking up each
+  # key-to-index mapping via key_idx_map. This should be faster than if we had
+  # to look up the key-to-index mapping for each item.
+  map <- function(fn) {
+    m <- clone()
+    m$modify(fn)
+    m
+  }
+
+  map_with_key <- function(fn) {
+    m <- clone()
+    m$modify_with_key(fn)
+    m
+  }
+
+
+  # Like map(), but modifies the values in place.
+  # Returns NULL.
+  modify <- function(fn) {
+    idxs <- non_hole_idxs_()
+    for (i in idxs) {
+      values[[i]] <<- fn(values[[i]])
+    }
+    invisible()
+  }
+
+  # Like map_with_key(), but modifies the values in place.
+  # Returns NULL.
+  modify_with_key <- function(fn) {
+    idxs <- non_hole_idxs_()
+    for (i in idxs) {
+      values[[i]] <<- fn(keys_[[i]], values[[i]])
+    }
+    invisible()
+  }
+
+
+  # Invoke a function on each value, but don't collect the return values.
+  # Returns NULL.
+  walk <- function(fn) {
+    idxs <- non_hole_idxs_()
+    for (i in idxs) {
+      fn(values[[i]])
+    }
+    invisible()
+  }
+
+  # Like walk(), but fn takes args (key, value)
+  walk_with_key <- function(fn) {
+    idxs <- non_hole_idxs_()
+    for (i in idxs) {
+      fn(keys_[[i]], values[[i]])
+    }
+    invisible()
+  }
+
+
+
+  # Filter values. This implementation first clones the original map (which is
+  # very fast) and then removes items that fail the user-provided filter
+  # function. It is fastest when there are no items to remove. It would be
+  # possible to provide an option to build up the new fastmap by adding each
+  # item that passes the filter function; this would be faster when most items
+  # fail the filter.
+  filter <- function(fn) {
+    m <- clone()
+    for (key in m$keys()) {
+      if (!fn(m$get(key))) {
+        m$remove(key)
+      }
+    }
+    m
+  }
+
+  filter_with_key <- function(fn) {
+    m <- clone()
+    for (key in m$keys()) {
+      if (!fn(key, m$get(key))) {
+        m$remove(key)
+      }
+    }
+    m
+  }
+
+  filter_key <- function(fn) {
+    m <- clone()
+    for (key in m$keys()) {
+      if (!fn(key)) {
+        m$remove(key)
+      }
+    }
+    m
+  }
+
+  # Returns a named list
   as_list <- function(sort = FALSE) {
     idxs <- non_hole_idxs_()
     result <- values[idxs]
@@ -478,6 +612,19 @@ fastmap <- function(missing_default = NULL) {
     keys = keys,
     size = size,
     clone = clone,
-    as_list = as_list
+    as_list = as_list,
+
+    map = map,
+    map_with_key = map_with_key,
+
+    modify = modify,
+    modify_with_key = modify_with_key,
+
+    walk = walk,
+    walk_with_key = walk_with_key,
+
+    filter = filter,
+    filter_with_key = filter_with_key,
+    filter_key = filter_key
   )
 }
