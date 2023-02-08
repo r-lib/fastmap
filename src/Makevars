@@ -1,6 +1,3 @@
-# Use C++11 if available
-CXX_STD=CXX11
-
 # Require Rf_ prefix for R's functions, to avoid clashes.
 PKG_CXXFLAGS=-DR_NO_REMAP
 
