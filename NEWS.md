@@ -1,6 +1,7 @@
 fastmap 1.1.1.9000
 =============
 
+* Changed `fastmap`'s `$has()` method to use C++ `contains()` method (which is new in hopscotch-map 2.3.0). (#30)
 
 fastmap 1.1.1
 =============
