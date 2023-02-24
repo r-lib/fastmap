@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://r-lib.github.io/fastmap/404.html</loc>
+  </url>
+  <url>
+    <loc>https://r-lib.github.io/fastmap/LICENSE-text.html</loc>
+  </url>
+  <url>
+    <loc>https://r-lib.github.io/fastmap/authors.html</loc>
+  </url>
+  <url>
+    <loc>https://r-lib.github.io/fastmap/index.html</loc>
+  </url>
+  <url>
+    <loc>https://r-lib.github.io/fastmap/news/index.html</loc>
+  </url>
+  <url>
+    <loc>https://r-lib.github.io/fastmap/reference/fastmap.html</loc>
+  </url>
+  <url>
+    <loc>https://r-lib.github.io/fastmap/reference/fastqueue.html</loc>
+  </url>
+  <url>
+    <loc>https://r-lib.github.io/fastmap/reference/faststack.html</loc>
+  </url>
+  <url>
+    <loc>https://r-lib.github.io/fastmap/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>https://r-lib.github.io/fastmap/reference/key_missing.html</loc>
+  </url>
+</urlset>

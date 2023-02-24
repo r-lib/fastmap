@@ -1,6 +1,9 @@
-pandoc: 2.11.3.2
-pkgdown: 1.6.1.9000
-pkgdown_sha: 84f234cf19153ce99bf1bcf875dc56248ddf0cbe
+pandoc: 2.7.3
+pkgdown: 2.0.7
+pkgdown_sha: ~
 articles: {}
-last_built: 2021-01-25T21:17Z
+last_built: 2023-02-24T16:02Z
+urls:
+  reference: https://r-lib.github.io/fastmap/reference
+  article: https://r-lib.github.io/fastmap/articles
 
