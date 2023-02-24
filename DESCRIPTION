@@ -1,6 +1,6 @@
 Package: fastmap
 Title: Fast Data Structures
-Version: 1.1.1
+Version: 1.1.1.9000
 Authors@R: c(
     person("Winston", "Chang", email = "winston@rstudio.com", role = c("aut", "cre")),
     person(given = "RStudio", role = c("cph", "fnd")),
@@ -15,7 +15,7 @@ Description: Fast implementation of data structures, including a key-value
 License: MIT + file LICENSE
 Encoding: UTF-8
 RoxygenNote: 7.2.3
-Suggests: 
+Suggests:
     testthat (>= 2.1.1)
 URL: https://r-lib.github.io/fastmap/, https://github.com/r-lib/fastmap
 BugReports: https://github.com/r-lib/fastmap/issues
