@@ -5,7 +5,7 @@
 #include <R_ext/Visibility.h>
 
 /* .Call calls */
-extern SEXP C_map_create();
+extern SEXP C_map_create(void);
 extern SEXP C_map_copy(SEXP);
 extern SEXP C_map_set(SEXP, SEXP, SEXP);
 extern SEXP C_map_get(SEXP, SEXP);
