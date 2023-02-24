@@ -1,4 +1,4 @@
-fastmap 1.1.0.9000
+fastmap 1.1.1
 =============
 
 * Updated hopscotch-map library to 2.3.0.
