@@ -278,8 +278,7 @@ fastmap <- function(missing_default = NULL) {
   # Internal function
   has_one <- function(key) {
     ensure_restore_map()
-    idx <- .Call(C_map_get, key_idx_map, key)
-    return(idx != -1L)
+    .Call(C_map_has, key_idx_map, key)
   }
 
   has <- function(keys) {
