@@ -2,8 +2,8 @@ Package: fastmap
 Title: Fast Data Structures
 Version: 1.1.1.9000
 Authors@R: c(
-    person("Winston", "Chang", email = "winston@rstudio.com", role = c("aut", "cre")),
-    person(given = "RStudio", role = c("cph", "fnd")),
+    person("Winston", "Chang", email = "winston@posit.co", role = c("aut", "cre")),
+    person(given = "Posit Software, PBC", role = c("cph", "fnd")),
     person(given = "Tessil", role = "cph", comment = "hopscotch_map library")
     )
 Description: Fast implementation of data structures, including a key-value
