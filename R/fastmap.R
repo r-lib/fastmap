@@ -238,6 +238,9 @@ fastmap <- function(missing_default = NULL) {
 
   mset <- function(..., .list = NULL) {
     objs <- c(list(...), .list)
+    if (length(objs) == 0) {
+      return(invisible(list(a=1)[0])) # Special case: return empty named list
+    }
     keys <- names(objs)
     if (is.null(keys) || any(is.na(keys)) || any(keys == "")) {
       stop("mset: all values must be named.")
