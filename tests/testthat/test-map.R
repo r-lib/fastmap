@@ -329,3 +329,22 @@ test_that("keys() implementation", {
   expect_setequal(m$keys(), c_keys(m))
   expect_identical(m$keys(TRUE), c_keys(m, TRUE))
 })
+
+
+test_that("mset() with empty input", {
+  m <- fastmap()
+
+  m$mset()
+  expect_identical(m$as_list(), empty_named_list())
+  m$mset(.list = character())
+  m$mset(.list = list())
+  m$mset(.list = empty_named_list())
+  expect_identical(m$as_list(), empty_named_list())
+
+  m$set("a", 1)
+  expect_identical(m$as_list(), list(a = 1))
+  m$mset(.list = character())
+  m$mset(.list = list())
+  m$mset(.list = empty_named_list())
+  expect_identical(m$as_list(), list(a = 1))
+})
