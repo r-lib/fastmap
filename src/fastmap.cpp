@@ -19,7 +19,7 @@ std::string key_from_sexp(SEXP key_r) {
   }
   SEXP key_c = STRING_ELT(key_r, 0);
   if (key_c == NA_STRING || Rf_StringBlank(key_c)) {
-    Rf_error("key must be not be \"\" or NA");
+    Rf_error("key must not be \"\" or NA");
   }
   return std::string(Rf_translateCharUTF8(key_c));
 }
