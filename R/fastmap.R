@@ -374,7 +374,7 @@ fastmap <- function(missing_default = NULL) {
     result <- values[idxs]
     names(result) <- keys_[idxs]
     if (sort) {
-      result <- result[order(names(result))]
+      result <- result[order(names(result), method = "radix")]
     }
     result
   }
